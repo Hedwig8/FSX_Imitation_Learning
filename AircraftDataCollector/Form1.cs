@@ -15,8 +15,7 @@ namespace AircraftDataCollector
 {
     public partial class Form1 : Form
     {
-        
-        
+
         #region Constants
         
         // User-defined win32 event
@@ -32,18 +31,18 @@ namespace AircraftDataCollector
         private List<Struct1> log = null;
         private List<Struct2> log2 = null;
         
-        SimConnect simconnect = null;
-
         private bool simrunning = false;
-        Stopwatch sw = new Stopwatch();
-    
         
+        private Stopwatch sw = new Stopwatch();
         private Timer ConnectTimer = null;
         
         #endregion
         
         
         #region SimConnectVars
+        
+        SimConnect simconnect = null;
+        
         enum EVENTS
         {
             SIMSTART,
@@ -152,6 +151,7 @@ namespace AircraftDataCollector
             public double sea_level_pressure { get; set; }
             public double gear_position { get; set; }
             public double fuel_current { get; set; }
+            public double time { get; set; }
         }
 
         #endregion
@@ -170,22 +170,18 @@ namespace AircraftDataCollector
         
         private void Form1_Load(object sender, EventArgs e)
         {
-            
             ConnectTimer = new Timer();
             ConnectTimer.Interval = (1000); // 1s
             ConnectTimer.Tick += new EventHandler(ConnectTimer_Tick);
             ConnectTimer.Start();
-
         }
         
         private void ConnectTimer_Tick(object sender, EventArgs e)
         {
-            
             textBox1.Text = "Trying to connect ...";
-            if (connect())
+            if (openConnection())
             {
                 ConnectTimer.Stop();
-
             }
         }
         
@@ -195,8 +191,12 @@ namespace AircraftDataCollector
             closeConnection();
             GC.Collect();
         }
-
-        private bool connect()
+        
+        #endregion
+        
+        
+        #region Connection
+        private bool openConnection()
         {
             if (simconnect == null)
             {
@@ -227,7 +227,24 @@ namespace AircraftDataCollector
             return false;
         }
         
+        private void closeConnection()
+        {
+            if (simconnect != null)
+            {
+                // Unsubscribe from all the system events
+                simconnect.UnsubscribeFromSystemEvent(EVENTS.SIMSTART);
+                simconnect.UnsubscribeFromSystemEvent(EVENTS.SIMSTOP);
+                
+                // Dispose serves the same purpose as SimConnect_Close()
+                simconnect.Dispose();
+                simconnect = null;
+            }
+        }
         
+        #endregion
+        
+        
+        #region Buttons
         private void buttonStart_Click(object sender, EventArgs e)
         {
             simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Struct1, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SIM_FRAME, 0, 0, 0, 0);
@@ -269,30 +286,15 @@ namespace AircraftDataCollector
             popup.Dispose();
         }
 
-
-        // Simconnect client will send a win32 message when there is 
-        // a packet to process. ReceiveMessage must be called to
-        // trigger the events. This model keeps simconnect processing on the main thread.
-
-        protected override void DefWndProc(ref Message m)
+        private void btnExit_Click(object sender, EventArgs e)
         {
-            if (m.Msg == WM_USER_SIMCONNECT)
-            {
-                if (simconnect != null)
-                {
-                    simconnect.ReceiveMessage();
-                }
-            }
-            else
-            {
-                base.DefWndProc(ref m);
-            }
+            closeConnection();
+            this.Close();
         }
         
         #endregion
+        
 
-        
-        
         #region  SimConnect
         
         // Set up all the SimConnect related data definitions and event handlers
@@ -392,40 +394,7 @@ namespace AircraftDataCollector
         }
 
 
-        void displayStats2(Struct2 s2)
-        {
-            
-            resetText();
-            
-            displayText("Title: " + s2.title);
-            
-            displayText("Ambient density:" + s2. ambient_density);
-            
-            displayText("Ambient temperature: " + s2.ambient_temperature);
-            
-            displayText("Ambient pressure: " + s2.ambient_pressure);
-            
-            displayText("Sea level pressure: " + s2.sea_level_pressure);
-
-            displayText("Gear position: " + s2.gear_position);
-
-            displayText("Current fuel: " + s2.fuel_current);
-
-            
-            double avg = 0;
-            double count = 0;
-            
-            for (int i = log2.Count - 1; i > 0 && i > log2.Count - 5; i--)
-            {
-                avg += log2[i - 1].fuel_current - log2[i].fuel_current;
-                count++;
-            }
-
-            avg /= count;
-            
-            displayText("Calculated fuel flow: " + avg * 60 * 60);
-            displayText("Minutes until out of fuel: " + (s2.fuel_current / (avg * 60)));
-        }
+        
         
         void displayStats(Struct1 s1)
         {
@@ -468,6 +437,32 @@ namespace AircraftDataCollector
             displayText("\n");
         }
         
+        void displayStats2(Struct2 s2)
+        {
+            resetText();
+            
+            displayText("Title: " + s2.title);
+            displayText("Ambient density:" + s2. ambient_density);
+            displayText("Ambient temperature: " + s2.ambient_temperature);
+            displayText("Ambient pressure: " + s2.ambient_pressure);
+            displayText("Sea level pressure: " + s2.sea_level_pressure);
+            displayText("Gear position: " + s2.gear_position);
+            displayText("Current fuel: " + s2.fuel_current);
+
+            double avg = 0;
+            double count = 0;
+            
+            for (int i = log2.Count - 1; i > 0 && i > log2.Count - 5; i--)
+            {
+                avg += log2[i - 1].fuel_current - log2[i].fuel_current;
+                count++;
+            }
+
+            avg /= count;
+            
+            displayText("Calculated fuel flow: " + avg * 60 * 60);
+            displayText("Minutes until out of fuel: " + (s2.fuel_current / (avg * 60)));
+        }
         
         void simconnect_OnRecvSimobjectData(SimConnect sender, SIMCONNECT_RECV_SIMOBJECT_DATA data)
         {
@@ -488,17 +483,18 @@ namespace AircraftDataCollector
                     
                     log.Add(s1);
 
-                    // if (log.Count % 100 == 0)
-                    // {
-                    //     Struct1 current = log.Last();
-                    //     displayStats(current);
-                    // }
+                    if (log.Count % 100 == 0)
+                    {
+                        Struct1 current = log.Last();
+                        displayStats(current);
+                    }
                     break;
 
                 case DATA_REQUESTS.REQUEST_2:
                     Struct2 s2 = (Struct2) data.dwData[0];
+                    s2.time = log.Count == 0 ? 0 : log.Last().time;
                     log2.Add(s2);
-                    displayStats2(s2);
+                    //displayStats2(s2);
                     break;
                 
                 default:
@@ -573,34 +569,59 @@ namespace AircraftDataCollector
 
         #endregion
         
+               
+        #region File
+        
+        void writeToCSV<StructT>(List<StructT> logT, string id)
+        {
+            string time = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
+            string filename = time + "_" + id + ".csv";
+            
+            using (var writer = new StreamWriter(subPath + filename))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            {
+                csv.WriteHeader<StructT>();
+                csv.NextRecord();
+
+                foreach (var s1 in logT)
+                {
+                    csv.WriteRecord<StructT>(s1);
+                    csv.NextRecord();
+                }
+                
+            }
+        }
+
+        #endregion
         
         
         #region Utils
+        
+        
+        // Simconnect client will send a win32 message when there is 
+        // a packet to process. ReceiveMessage must be called to
+        // trigger the events. This model keeps simconnect processing on the main thread.
+
+        protected override void DefWndProc(ref Message m)
+        {
+            if (m.Msg == WM_USER_SIMCONNECT)
+            {
+                if (simconnect != null)
+                {
+                    simconnect.ReceiveMessage();
+                }
+            }
+            else
+            {
+                base.DefWndProc(ref m);
+            }
+        }
+    
         
         private void setButtons(bool bStart, bool bStop)
         {
             buttonStart.Enabled = bStart;
             buttonStop.Enabled = bStop;
-        }
-
-        private void closeConnection()
-        {
-            if (simconnect != null)
-            {
-                // Unsubscribe from all the system events
-                simconnect.UnsubscribeFromSystemEvent(EVENTS.SIMSTART);
-                simconnect.UnsubscribeFromSystemEvent(EVENTS.SIMSTOP);
-                
-                // Dispose serves the same purpose as SimConnect_Close()
-                simconnect.Dispose();
-                simconnect = null;
-            }
-        }
-        
-        private void btnExit_Click(object sender, EventArgs e)
-        {
-            closeConnection();
-            this.Close();
         }
         
         
@@ -626,34 +647,6 @@ namespace AircraftDataCollector
 
         #endregion
         
-
-        
-        #region File
-        
-        void writeToCSV<StructT>(List<StructT> logT, string id)
-        {
-            string time = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
-            string filename = time + "_" + id + ".csv";
-            
-            using (var writer = new StreamWriter(subPath + filename))
-            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
-            {
-                csv.WriteHeader<StructT>();
-                csv.NextRecord();
-
-                foreach (var s1 in logT)
-                {
-                    csv.WriteRecord<StructT>(s1);
-                    csv.NextRecord();
-                }
-                
-            }
-        }
-
-        #endregion
-
-
-
     }
 }
 // End of sample
