@@ -20,9 +20,10 @@ To install the SDK in other versions of FSX please follow [this guide](https://w
 
 ## How to run the program
 
-1. Unzip *FSXDataResquest.zip* 
-2. Execute *FSXDataRequest.exe* (a window should pop up)
-3. The connection status should be "Trying to connect ..."
+1. Download *AircraftDataCollector.zip" in the releases
+2. Unzip *AircraftDataCollector.zip* 
+3. Execute *AircraftDataCollector.exe*
+4. A window should pop up with connection status "Trying to connect ..."
 <img src="https://i.imgur.com/sgwSDf8.png" width="300">
 
 
@@ -30,7 +31,7 @@ To install the SDK in other versions of FSX please follow [this guide](https://w
 ## How to collect flight data
 
 1. Run FSX.
-2. The *FSXDataRequest* automatically detects if FSX is running. The connection status should now be "Connected".
+2. The *AircraftDataCollector* automatically detects if FSX is running. The connection status should now be "Connected".
 
 <img src="https://i.imgur.com/3dPRiMU.png" width="300">
 
@@ -45,7 +46,7 @@ To install the SDK in other versions of FSX please follow [this guide](https://w
 
 <img src="https://i.imgur.com/cOL6u3F.png" width="300">
 
-9. All the log files are stored in the *logs* folder located inside *FSXDataRequest*. 
+9. All the log files are stored in the *logs* folder located inside *AircraftDataCollector*. 
 
 # How to send us the log files.
 
@@ -58,7 +59,7 @@ Drag and drop all the files on the *logs* folder into the website.
 
 ## Variables collected
 
-The following presents an exhaustive list of all the variables that *FSXDataRequest* collects:
+The following presents an exhaustive list of all the variables that *AircraftDataCollector* collects:
 
 * Altitude above ground
 * Altitude
