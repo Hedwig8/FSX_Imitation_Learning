@@ -77,8 +77,9 @@ namespace AircraftDataCollector
             this.Controls.Add(this.btnDiscard);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.btnSave);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "Form2";
-            this.Text = "Form2";
+            this.Text = "Confirmation";
             this.ResumeLayout(false);
             this.PerformLayout();
         }

@@ -494,7 +494,6 @@ namespace AircraftDataCollector
                     Struct2 s2 = (Struct2) data.dwData[0];
                     s2.time = log.Count == 0 ? 0 : log.Last().time;
                     log2.Add(s2);
-                    //displayStats2(s2);
                     break;
                 
                 default:
