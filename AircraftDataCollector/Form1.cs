@@ -279,8 +279,10 @@ namespace AircraftDataCollector
             // Show testDialog as a modal dialog and determine if DialogResult = OK.
             if (dialogresult== DialogResult.Yes)
             {
-                writeToCSV<Struct1>(log, "1");
-                writeToCSV<Struct2>(log2, "2");
+                var checkedButton = popup.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Checked);
+                String num = checkedButton.Tag.ToString();
+                writeToCSV<Struct1>(log, num + "_1");
+                writeToCSV<Struct2>(log2, num + "_2");
             }
             
             popup.Dispose();
