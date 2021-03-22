@@ -1,7 +1,23 @@
 # FSX Imitation Learning
-
 This project aims to create a program capable of autonomously flying aircraft on the FSX.
 At the moment only the data collection module is available.
+
+
+## Introduction
+This project is part of my master's thesis which aims to create an autopilot capable of learning to perform aerobatic maneuvers in various types of aircraft and conditions.
+The following section lists some maneuvers selected to be learned by the autopilot.
+We ask that you perform some of these maneuvers in various scenarios and with different aircraft while recording the logs using the AircraftDataCollector program.
+Please click on Stop collect after each maneuver in order to have only one maneuver per collect.
+
+
+## List of aerobatic maneuvers
+- Knife edge 180 degree turn
+- Half cuban eight: https://www.youtube.com/watch?v=Yj7LxfZi0dA
+- Canopy roll: http://www.youtube.com/watch?v=uCquoeGZ910&t=1m9s
+- Split: http://www.youtube.com/watch?v=uCquoeGZ910&t=1m52s
+- Immelman turn: http://www.youtube.com/watch?v=uCquoeGZ910&t=2m18s
+
+
 
 
 
@@ -42,9 +58,9 @@ To install the SDK in other versions of FSX please follow [this guide](https://w
 
 5. Perform an aerobatic maneuver.
 6. Click the button "Stop Collect".
-7. If you are happy with your performance click on "Save".
+7. If you are happy with your performance choose the maneuver performed and click on "Save".
 
-<img src="https://i.imgur.com/cOL6u3F.png" width="300">
+<img src="https://i.imgur.com/cJ9yuhC.png" width="300">
 
 9. All the log files are stored in the *logs* folder located inside *AircraftDataCollector*. 
 
