@@ -44,19 +44,19 @@ namespace AircraftDataCollector
             // btnSave
             // 
             this.btnSave.DialogResult = System.Windows.Forms.DialogResult.Yes;
-            this.btnSave.Location = new System.Drawing.Point(27, 229);
+            this.btnSave.Location = new System.Drawing.Point(24, 217);
             this.btnSave.Margin = new System.Windows.Forms.Padding(4);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(108, 37);
             this.btnSave.TabIndex = 5;
-            this.btnSave.Text = "Save";
+            this.btnSave.Text = "Next";
             this.btnSave.UseVisualStyleBackColor = true;
             // 
             // textBox1
             // 
             this.textBox1.BackColor = System.Drawing.SystemColors.Menu;
             this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
+            this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBox1.Location = new System.Drawing.Point(27, 21);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(354, 17);
@@ -66,7 +66,7 @@ namespace AircraftDataCollector
             // btnDiscard
             // 
             this.btnDiscard.DialogResult = System.Windows.Forms.DialogResult.No;
-            this.btnDiscard.Location = new System.Drawing.Point(172, 229);
+            this.btnDiscard.Location = new System.Drawing.Point(169, 217);
             this.btnDiscard.Margin = new System.Windows.Forms.Padding(4);
             this.btnDiscard.Name = "btnDiscard";
             this.btnDiscard.Size = new System.Drawing.Size(108, 37);
@@ -133,7 +133,7 @@ namespace AircraftDataCollector
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(314, 296);
+            this.ClientSize = new System.Drawing.Size(314, 270);
             this.Controls.Add(this.radioButton5);
             this.Controls.Add(this.radioButton4);
             this.Controls.Add(this.radioButton3);
@@ -144,9 +144,11 @@ namespace AircraftDataCollector
             this.Controls.Add(this.btnSave);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "Form2";
-            this.Text = "Confirmation";
+            this.Text = "Manoeuvre Performed";
+            this.Load += new System.EventHandler(this.Form2_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
 
         private System.Windows.Forms.RadioButton radioButton4;

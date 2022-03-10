@@ -205,7 +205,7 @@ namespace AircraftDataCollector
                 try
                 {
                     // the constructor is similar to SimConnect_Open in the native API
-                    simconnect = new SimConnect("Managed Data Request", this.Handle, WM_USER_SIMCONNECT, null, 0);
+                    simconnect = new SimConnect("Managed Data Request", this.Handle, WM_USER_SIMCONNECT, null, 1);
 
                     setButtons(true, false);
                     
@@ -275,19 +275,39 @@ namespace AircraftDataCollector
         
         public void SavePopup()
         {
-            Form2 popup = new Form2();
+            Form2 form2 = new Form2();
+            string tag;
 
-            DialogResult dialogresult = popup.ShowDialog(this);
+            DialogResult dialogresult_manoeuvre = form2.ShowDialog(this);
             // Show testDialog as a modal dialog and determine if DialogResult = OK.
-            if (dialogresult== DialogResult.Yes)
+            if (dialogresult_manoeuvre == DialogResult.Yes)
             {
-                var checkedButton = popup.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Checked);
-                String num = checkedButton.Tag.ToString();
-                writeToCSV<Struct1>(log, num + "_1");
-                writeToCSV<Struct2>(log2, num + "_2");
+                var checkedButton = form2.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Checked);
+                tag = checkedButton.Tag.ToString();
+            }
+            else
+            {
+                form2.Dispose();
+                return;
             }
             
-            popup.Dispose();
+            form2.Dispose();
+
+            // SECOND POPUP
+
+            Form3 form3 = new Form3();
+            string quality;
+
+            DialogResult dialogresult_quality = form3.ShowDialog(this);
+
+            if(dialogresult_quality == DialogResult.Yes)
+            {
+                var checkedButton = form3.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Checked);
+                quality = checkedButton.Tag.ToString();
+                writeToCSV<Struct1>(log, quality, tag, "1");
+                writeToCSV<Struct2>(log2, quality, tag, "2");
+            }
+            form3.Dispose();
         }
 
         private void btnExit_Click(object sender, EventArgs e)
@@ -578,12 +598,15 @@ namespace AircraftDataCollector
                
         #region File
         
-        void writeToCSV<StructT>(List<StructT> logT, string id)
+        void writeToCSV<StructT>(List<StructT> logT, string quality, string id, string struct1or2)
         {
+            string path = subPath + quality + "/" + id + "/";
+            System.IO.Directory.CreateDirectory(path);
+
             string time = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
-            string filename = time + "_" + id + ".csv";
+            string filename = time + "_" + struct1or2 + ".csv";
             
-            using (var writer = new StreamWriter(subPath + filename))
+            using (var writer = new StreamWriter(path + filename))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
                 csv.WriteHeader<StructT>();
@@ -594,7 +617,6 @@ namespace AircraftDataCollector
                     csv.WriteRecord<StructT>(s1);
                     csv.NextRecord();
                 }
-                
             }
         }
 
