@@ -154,6 +154,7 @@ namespace AircraftDataCollector
             public double gear_position { get; set; }
             public double fuel_current { get; set; }
             public double time { get; set; }
+            public double precipitation_state { get; set; }
         }
 
         #endregion
@@ -402,6 +403,7 @@ namespace AircraftDataCollector
                 simconnect.AddToDataDefinition(DEFINITIONS.Struct2, "SEA LEVEL PRESSURE", "", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
                 simconnect.AddToDataDefinition(DEFINITIONS.Struct2, "GEAR POSITION", "enum", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
                 simconnect.AddToDataDefinition(DEFINITIONS.Struct2, "FUEL TOTAL QUANTITY WEIGHT", "Pounds", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
+                simconnect.AddToDataDefinition(DEFINITIONS.Struct2, "AMBIENT PRECIP STATE", "", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
 
                 // IMPORTANT: register it with the simconnect managed wrapper marshaller
                 // if you skip this step, you will only receive a uint in the .dwData field.
