@@ -153,8 +153,8 @@ namespace AircraftDataCollector
             public double sea_level_pressure { get; set; }
             public double gear_position { get; set; }
             public double fuel_current { get; set; }
-            public double time { get; set; }
             public double precipitation_state { get; set; }
+            public double time { get; set; }
         }
 
         #endregion
@@ -394,6 +394,7 @@ namespace AircraftDataCollector
                 simconnect.AddToDataDefinition(DEFINITIONS.Struct1, "GENERAL ENG RPM:1", "rpm", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
                 simconnect.AddToDataDefinition(DEFINITIONS.Struct1, "General Eng Throttle Lever Position:1", "", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
 
+                simconnect.AddToDataDefinition(DEFINITIONS.Struct1, "ABSOLUTE TIME", "", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
 
                 // Struct 2
                 simconnect.AddToDataDefinition(DEFINITIONS.Struct2, "title", null, SIMCONNECT_DATATYPE.STRING256, 0.0f, SimConnect.SIMCONNECT_UNUSED);
@@ -507,8 +508,6 @@ namespace AircraftDataCollector
                         sw.Start();
                         simrunning = true;
                     }
-                    
-                    s1.time = sw.ElapsedMilliseconds;
                     
                     log.Add(s1);
 
