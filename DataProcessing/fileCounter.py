@@ -5,7 +5,8 @@ datasetPath = "../AircraftDataCollector/bin/Release/"
 id = "*"
 manouvreQuality = "Good"
 manoeuvreName = "*"
-manoeuvres = ['SteepCurve', 'HalfCubanEight', 'Immelmann', 'Split-S', 'Climb', 'Approach', 'TaxiRun&TakeOff', 'Landing', 'Roll', 'CanopyRoll', 'CubanEight', 'Hammerhead', 'Tailslide']
+manoeuvres = ['SteepCurve', 'HalfCubanEight', 'Immelmann', 'Split-S', 'Climb', 'Approach']
+#manoeuvres = ['SteepCurve', 'HalfCubanEight', 'Immelmann', 'Split-S', 'Climb', 'Approach', 'TaxiRun&TakeOff', 'Landing', 'Roll', 'CanopyRoll', 'CubanEight', 'Hammerhead', 'Tailslide']
 
 print(len(glob.glob(f'{datasetPath}/{id}/{manouvreQuality}/{manoeuvreName}/*.csv')))
 
