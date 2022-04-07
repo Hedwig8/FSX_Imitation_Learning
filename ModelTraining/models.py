@@ -1,5 +1,6 @@
 from keras.models import Sequential
 from keras.layers import LSTM, Dropout, Dense, InputLayer
+from keras.losses import MeanSquaredError
 
 
 def default_model():
@@ -11,7 +12,7 @@ def immelmann_model(shapeX1, shapeX2, shapey):
     model.add(LSTM(units=shapeX1, input_shape=(None, shapeX1, shapeX2)))
     model.add(Dropout(rate=0.3))
     model.add(Dense(shapey))
-    model.compile(optimizer='adam', loss='mean_square_error')
+    model.compile(optimizer='adam', loss=MeanSquaredError())
     return model
 
 manoeuvre_model = {
