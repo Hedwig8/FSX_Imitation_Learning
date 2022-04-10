@@ -14,17 +14,20 @@ manoeuvres = ['TaxiRun&TakeOff', 'Climb', 'Approach', 'Landing',
                 'Roll', 'SteepCurve', 'CubanEight', 'HalfCubanEight', 
                 'Immelmann', 'Split-S', 'Hammerhead', 'Tailslide', 'CanopyRoll']
 
-df = pd.DataFrame()
-
+# list of pd.DataFrame examples
+examples_list = []
 for filename in glob.glob(f'{datasetPath}/{id}/{manouvreQuality}/{manoeuvreName}/*_1.csv', recursive=True):
-    df = pd.concat([df, pd.read_csv(filename)], ignore_index=True)
+    examples_list.append(pd.read_csv(filename))
 
-df = manoeuvre_feature_calculation[manoeuvreName](df)
+# calculate features such as time_diff or altitude_diff inside each df
+examples_list = manoeuvre_feature_calculation[manoeuvreName](examples_list)
 
-X = manoeuvre_dataX[manoeuvreName](df)
-y = manoeuvre_datay[manoeuvreName](df)
-
-X, y = manoeuvre_dataset_2_Xinput[manoeuvreName](X, y)
+# returns list of chosen features for X and outputs y
+X_list = manoeuvre_dataX[manoeuvreName](examples_list)
+y_list = manoeuvre_datay[manoeuvreName](examples_list)
+print('dataX and y, before 2input')
+# returns np.array of inputs, each a window of X size
+X, y = manoeuvre_dataset_2_Xinput[manoeuvreName](X_list, y_list)
 
 model = manoeuvre_model[manoeuvreName](X.shape[1], X.shape[2], y.shape[0])
 model.fit(X, y, epochs=100)
