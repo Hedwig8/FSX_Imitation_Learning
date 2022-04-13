@@ -1,9 +1,6 @@
 import numpy as np
 
-def default_process():
-    pass
-
-def immelmann_features(X_list, y_list):
+def default_features(X_list, y_list):
     window = 15
     X_final = np.empty(shape=(0, window, X_list[0].shape[1]), dtype=np.float32)
     y_final = np.empty(shape=(0))
@@ -16,6 +13,6 @@ def immelmann_features(X_list, y_list):
     return X_final, y_final
 
 manoeuvre_dataset_2_Xinput = {
-    'Hammerhead': default_process,
-    'Immelmann': immelmann_features,
+    'Immelmann': default_features,
+    'SteepCurve': default_features,
 }
