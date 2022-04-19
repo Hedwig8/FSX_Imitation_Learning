@@ -8,7 +8,7 @@ from dataset2Xinput import manoeuvre_dataset_2_Xinput
 
 dataset_path = "../AircraftDataCollector/bin/Release"
 id = "*"
-manouvre_quality = "Good"
+manoeuvre_quality = "Good"
 
 # combinations of manoeuvers and control surfaces
 manoeuvres_controls = {
@@ -32,7 +32,7 @@ manoeuvres_controls = {
 for manoeuvre_name, value in manoeuvres_controls.items():
     # list of pd.DataFrame examples
     examples_list = []
-    for filename in glob.glob(f'{dataset_path}/{id}/{manouvre_quality}/{manoeuvre_name}/*_1.csv', recursive=True):
+    for filename in glob.glob(f'{dataset_path}/{id}/{manoeuvre_quality}/{manoeuvre_name}/*_1.csv', recursive=True):
         examples_list.append(pd.read_csv(filename))
 
     # calculate features such as time_diff or altitude_diff inside each df
