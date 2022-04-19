@@ -1,7 +1,5 @@
 import glob
-import math
 import pandas as pd
-import numpy as np
 import plotly.express as px
 
 from visUtils import velocity_to_position, rotate_initial_heading
@@ -26,8 +24,8 @@ for filename in glob.glob(f'{dataset_path}/{id}/{manoeuvre_quality}/{manoeuvre_n
 components_box = px.box(components_list)
 components_box.show()
 
-min_eval = np.min(evals_list)
-max_eval = np.max(evals_list)
+min_eval = min(evals_list)
+max_eval = max(evals_list)
 
 
 trajetories_lines = px.line_3d()

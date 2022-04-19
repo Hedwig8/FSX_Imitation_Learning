@@ -1,4 +1,3 @@
-import os
 import glob
 
 datasetPath = "../AircraftDataCollector/bin/Release/"
