@@ -1,2 +1,2 @@
-pandas=1.4.1
-tensorflow-gpu=2.8.0
+pandas==1.4.1
+tensorflow-gpu==2.8.0
