@@ -2,7 +2,7 @@ import pandas as pd
 from utils import csvFilePaths, saveDataFrame2CSV
 
 inputDataset = '../AircraftDataCollector/bin/Release/'
-output = './newnewDataset/'
+output = '../dataset/'
 
 files = csvFilePaths(inputDataset)
 

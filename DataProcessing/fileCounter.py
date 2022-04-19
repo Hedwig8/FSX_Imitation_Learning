@@ -3,12 +3,12 @@ import glob
 
 datasetPath = "../AircraftDataCollector/bin/Release/"
 id = "*"
-manouvreQuality = "Good"
+manoeuvreQuality = "Good"
 manoeuvreName = "*"
 manoeuvres = ['SteepCurve', 'HalfCubanEight', 'Immelmann', 'Split-S', 'Climb', 'Approach']
 #manoeuvres = ['SteepCurve', 'HalfCubanEight', 'Immelmann', 'Split-S', 'Climb', 'Approach', 'TaxiRun&TakeOff', 'Landing', 'Roll', 'CanopyRoll', 'CubanEight', 'Hammerhead', 'Tailslide']
 
-print(len(glob.glob(f'{datasetPath}/{id}/{manouvreQuality}/{manoeuvreName}/*.csv')))
+print(len(glob.glob(f'{datasetPath}/{id}/{manoeuvreQuality}/{manoeuvreName}/*.csv')))
 
 for manoeuvre in manoeuvres:
     good = int(len(glob.glob(f'{datasetPath}/{id}/Good/{manoeuvre}/*.csv'))/2)
