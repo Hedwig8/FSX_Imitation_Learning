@@ -13,7 +13,7 @@ manoeuvre_quality = "Good"
 # combinations of manoeuvers and control surfaces
 manoeuvres_controls = {
     #'Immelmann': ['elevator', 'aileron'], # rudder?
-    'SteepCurve': ['elevator', 'aileron', 'rudder'],
+    #'SteepCurve': ['elevator', 'aileron', 'rudder'],
     'Split-S': ['elevator', 'aileron'], #rudder?
     'HalfCubanEight': ['elevator', 'aileron'], #rudder?
     'Climb': ['elevator'], #aileron?
@@ -47,3 +47,4 @@ for manoeuvre_name, value in manoeuvres_controls.items():
 
         model = manoeuvre_model[manoeuvre_name](X.shape[1], X.shape[2], y.shape[0])
         model.fit(X, y, epochs=100)
+        model.save(f'trained/{manoeuvre_name}/{control_surface}')
