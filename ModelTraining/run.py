@@ -1,23 +1,24 @@
 import pandas as pd
 import glob
+import tensorflow as tf
 
 from featureCalculation import manoeuvre_feature_calculation
 from dataConsidered import manoeuvre_data
 from models import manoeuvre_model
 from dataset2Xinput import manoeuvre_dataset_2_Xinput
 
-dataset_path = "../AircraftDataCollector/bin/Release"
+dataset_path = "../dataset"
 id = "*"
 manoeuvre_quality = "Good"
 
 # combinations of manoeuvers and control surfaces
 manoeuvres_controls = {
-    #'Immelmann': ['elevator', 'aileron'], # rudder?
-    #'SteepCurve': ['elevator', 'aileron', 'rudder'],
-    'Split-S': ['elevator', 'aileron'], #rudder?
-    'HalfCubanEight': ['elevator', 'aileron'], #rudder?
-    'Climb': ['elevator'], #aileron?
-    'Approach': ['elevator', 'throttle'], #aileron?
+    'Immelmann': ['elevator', 'aileron'],
+    'SteepCurve': ['elevator', 'aileron', 'rudder'],
+    'Split-S': ['elevator', 'aileron'],
+    'HalfCubanEight': ['elevator', 'aileron'],
+    'Climb': ['elevator'],
+    'Approach': ['elevator', 'throttle'],
     
     'TaxiRun&TakeOff': [],
     'Landing': [],
@@ -37,14 +38,15 @@ for manoeuvre_name, value in manoeuvres_controls.items():
 
     # calculate features such as time_diff or altitude_diff inside each df
     examples_list = manoeuvre_feature_calculation[manoeuvre_name](examples_list)
-    print(examples_list[0]['heading_diff'].values)
+    
     for control_surface in value:
         # returns list of chosen features for X and outputs y
         X_list, y_list = manoeuvre_data[manoeuvre_name][control_surface](examples_list)
-        print('data X and y, before 2input')
+        
         # returns np.array of inputs, each a window of X size
         X, y = manoeuvre_dataset_2_Xinput[manoeuvre_name](X_list, y_list)
 
-        model = manoeuvre_model[manoeuvre_name](X.shape[1], X.shape[2], y.shape[0])
-        model.fit(X, y, epochs=100)
+        model = manoeuvre_model[manoeuvre_name](X, y)
+        callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=3, mode='min')
+        model.fit(X, y, epochs=100, callbacks=[callback])
         model.save(f'trained/{manoeuvre_name}/{control_surface}')

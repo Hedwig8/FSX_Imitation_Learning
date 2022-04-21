@@ -13,6 +13,10 @@ def default_features(X_list, y_list):
     return X_final, y_final
 
 manoeuvre_dataset_2_Xinput = {
+    'Approach': default_features,
+    'Climb': default_features,
+    'HalfCubanEight': default_features,
     'Immelmann': default_features,
+    'Split-S': default_features,
     'SteepCurve': default_features,
 }

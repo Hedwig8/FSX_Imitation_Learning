@@ -1,14 +1,51 @@
-import numpy as np
 
 def default_features():
     pass
+
+def approach_features(ex_list):
+    new_list = []
+    for df in ex_list:
+        df['time_diff'] = df['time'].diff().shift(-1)
+        min_altitude = min(df['altitude'])
+        df['altitude_diff'] = min_altitude - df['altitude']
+        new_list.append(df[:-1])
+    return new_list
+
+def climb_features(ex_list):
+    new_list = []
+    for df in ex_list:
+        df['time_diff'] = df['time'].diff().shift(-1)
+        max_altitude = max(df['altitude'])
+        df['altitude_diff'] = max_altitude - df['altitude']
+        new_list.append(df[:-1])
+    return new_list
+
+def half_cuban_eight_features(ex_list):
+    new_list = []
+    for df in ex_list:
+        df['time_diff'] = df['time'].diff().shift(-1)
+        max_altitude = max(df['altitude'])
+        df['max_altitude_diff'] = max_altitude - df['altitude']
+        final_altitude = df['altitude'].iloc[-1]
+        df['final_altitude_diff'] = final_altitude - df['altitude']
+        new_list.append(df[:-1])
+    return new_list
 
 def immelmann_features(ex_list):
     new_list = []
     for df in ex_list:
         df['time_diff'] = df['time'].diff().shift(-1)
-        max_altitude = np.max(df['altitude'])
+        max_altitude = max(df['altitude'])
         df['altitude_diff'] = max_altitude - df['altitude']
+        new_list.append(df[:-1])
+    return new_list
+
+def split_s_features(ex_list):
+    new_list = []
+    for df in ex_list:
+        df['time_diff'] = df['time'].diff().shift(-1)
+        min_altitude = min(df['altitude'])
+        df['altitude_diff'] = df['altitude'] - min_altitude
         new_list.append(df[:-1])
     return new_list
 
@@ -33,6 +70,10 @@ def curve_features(ex_list):
     return new_list
 
 manoeuvre_feature_calculation = {
+    'Approach': approach_features,
+    'Climb': climb_features,
+    'HalfCubanEight': half_cuban_eight_features,
     'Immelmann': immelmann_features,
+    'Split-S': split_s_features,
     'SteepCurve': curve_features,
 }
