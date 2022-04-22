@@ -1,11 +1,14 @@
 import pandas as pd
 import glob
 import tensorflow as tf
+from sklearn.model_selection import train_test_split
+import json
+import time
 
 from featureCalculation import manoeuvre_feature_calculation
 from dataConsidered import manoeuvre_data
 from models import manoeuvre_model
-from dataset2Xinput import manoeuvre_dataset_2_Xinput
+from dataset2input import manoeuvre_dataset_2_input
 
 dataset_path = "../dataset"
 id = "*"
@@ -20,33 +23,70 @@ manoeuvres_controls = {
     'Climb': ['elevator'],
     'Approach': ['elevator', 'throttle'],
     
-    'TaxiRun&TakeOff': [],
-    'Landing': [],
-    'Roll': [], #aileron, elevator?
-    'CanopyRoll': [], #aileron, elevator?
-    'CubanEight': [],
-    'HammerHead': [],
-    'Tailslide': []
+    #'TaxiRun&TakeOff': [],
+    #'Landing': [],
+    #'Roll': [], #aileron, elevator?
+    #'CanopyRoll': [], #aileron, elevator?
+    #'CubanEight': [],
+    #'HammerHead': [],
+    #'Tailslide': []
 }
 
+start_time = time.time()
+
 # load of all examples from manoeuvre_name 
-for manoeuvre_name, value in manoeuvres_controls.items():
+for manoeuvre_name, controls in manoeuvres_controls.items():
     # list of pd.DataFrame examples
     examples_list = []
     for filename in glob.glob(f'{dataset_path}/{id}/{manoeuvre_quality}/{manoeuvre_name}/*_1.csv', recursive=True):
         examples_list.append(pd.read_csv(filename))
 
+    # separate at this stage to prevent any test data "leaked" to the training
+    examples_train, examples_test = train_test_split(examples_list, test_size=0.2)
+
     # calculate features such as time_diff or altitude_diff inside each df
-    examples_list = manoeuvre_feature_calculation[manoeuvre_name](examples_list)
+    examples_train = manoeuvre_feature_calculation[manoeuvre_name](examples_train)
+    examples_test = manoeuvre_feature_calculation[manoeuvre_name](examples_test)
     
-    for control_surface in value:
+    for control_surface in controls:
         # returns list of chosen features for X and outputs y
-        X_list, y_list = manoeuvre_data[manoeuvre_name][control_surface](examples_list)
+        X_train, y_train = manoeuvre_data[manoeuvre_name][control_surface](examples_train)
+        X_test, y_test = manoeuvre_data[manoeuvre_name][control_surface](examples_test)
         
         # returns np.array of inputs, each a window of X size
-        X, y = manoeuvre_dataset_2_Xinput[manoeuvre_name](X_list, y_list)
+        X, y = manoeuvre_dataset_2_input[manoeuvre_name](X_train, y_train)
 
+        # model
         model = manoeuvre_model[manoeuvre_name](X, y)
         callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=3, mode='min')
-        model.fit(X, y, epochs=100, callbacks=[callback])
+
+        # training
+        history = model.fit(X, y, epochs=100, batch_size=32, validation_split=0.2, callbacks=[callback])
+
+        # test predictions
+        X_predict, y_true_val = manoeuvre_dataset_2_input[manoeuvre_name](X_test, y_test)
+        predictions = model.predict(X_predict)
+
+        # model training and testing data stored on file
+        history_dict = { f'{manoeuvre_name}_{control_surface}':{
+                            'history': history.history, 
+                            'predictions': predictions.flatten().tolist(), 
+                            'true_value': y_true_val.tolist(),}
+                        }
+       
+        history_from_file = {}
+        try:
+            # read contents
+            with open('history.json', 'r') as file:
+                history_from_file = json.load(file)
+        except:
+            pass
+        finally:
+            # re-write with new dict addition
+            with open('history.json', "w") as file:
+                history_to_store = {**history_from_file, **history_dict}
+                json.dump(history_to_store, file)
+
         model.save(f'trained/{manoeuvre_name}/{control_surface}')
+
+print(f'------- Execution time: {time.time() - start_time} seconds -----------')

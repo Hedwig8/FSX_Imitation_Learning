@@ -11,7 +11,7 @@ def default_model(X_train, y_train):
     model.add(normalizer)
     model.add(LSTM(units=X_train.shape[1], input_shape=(None, X_train.shape[1], X_train.shape[2])))
     model.add(Dropout(rate=0.3))
-    model.add(Dense(y_train.shape[0]))
+    model.add(Dense(1))
     model.compile(optimizer='adam', loss=MeanSquaredError())
     return model
 
