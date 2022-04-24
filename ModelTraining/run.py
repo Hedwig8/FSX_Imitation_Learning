@@ -77,16 +77,16 @@ for manoeuvre_name, controls in manoeuvres_controls.items():
         history_from_file = {}
         try:
             # read contents
-            with open('history.json', 'r') as file:
+            with open('../TrainedModels/history.json', 'r') as file:
                 history_from_file = json.load(file)
         except:
             pass
         finally:
             # re-write with new dict addition
-            with open('history.json', "w") as file:
+            with open('../TrainedModels/history.json', "w") as file:
                 history_to_store = {**history_from_file, **history_dict}
                 json.dump(history_to_store, file)
 
-        model.save(f'trained/{manoeuvre_name}/{control_surface}')
+        model.save(f'../TrainedModels/{manoeuvre_name}/{control_surface}')
 
 print(f'------- Execution time: {time.time() - start_time} seconds -----------')
