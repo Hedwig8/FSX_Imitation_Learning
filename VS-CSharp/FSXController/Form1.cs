@@ -1,26 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using System;
 using System.Diagnostics;
-using System.Windows.Forms;
 using Microsoft.FlightSimulator.SimConnect;
 using System.Runtime.InteropServices;
-using System.Globalization;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Timers;
-using CsvHelper;
 using NetMQ;
 using NetMQ.Sockets;
-using Timer = System.Windows.Forms.Timer;
 
 namespace FSXLSTM
 {
@@ -50,27 +37,50 @@ namespace FSXLSTM
         
         private double time = 0;
         
+        List<double> altitude_ground_v = new List<double>();
         List<double> altitude_v = new List<double>();
         List<double> aoa_v = new List<double>();
-        List<double> vrx_v = new List<double>();
-        List<double> vry_v = new List<double>();
-        List<double> vrz_v = new List<double>();
+
         List<double> vx_v = new List<double>();
         List<double> vy_v = new List<double>();
         List<double> vz_v = new List<double>();
-        List<double> ax_v = new List<double>();
-        List<double> ay_v = new List<double>();
-        List<double> az_v = new List<double>();
+
         List<double> vwx_v = new List<double>();
         List<double> vwy_v = new List<double>();
         List<double> vwz_v = new List<double>();
+
+        List<double> vrx_v = new List<double>();
+        List<double> vry_v = new List<double>();
+        List<double> vrz_v = new List<double>();
+
+        List<double> wvbx_v = new List<double>();
+        List<double> wvby_v = new List<double>();
+        List<double> wvbz_v = new List<double>();
+
+        List<double> wvwx_v = new List<double>();
+        List<double> wvwy_v = new List<double>();
+        List<double> wvwz_v = new List<double>();
+
+        List<double> ax_v = new List<double>();
+        List<double> ay_v = new List<double>();
+        List<double> az_v = new List<double>();
+
         List<double> cosine_v = new List<double>();
         List<double> sine_v = new List<double>();
+
         List<double> pitch_v = new List<double>();
         List<double> bank_v = new List<double>();
         List<double> heading_v = new List<double>();
+
+        List<double> rudder_v = new List<double>();
         List<double> elevator_v = new List<double>();
         List<double> aileron_v = new List<double>();
+
+        List<double> eng_rpm_v = new List<double>();
+        List<double> throttle_v = new List<double>();
+
+        List<double> time_v = new List<double>();
+
         List<double> x_v = new List<double>();
         List<double> y_v = new List<double>();
         List<double> z_v = new List<double>();
@@ -119,26 +129,57 @@ namespace FSXLSTM
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
         struct Control1
         {
-            // Control Surfaces
+            public double altitude_ground { get; set; }
             public double altitude { get; set; }
+
             public double aoa { get; set; }
-            public double vrx { get; set; }
-            public double vry { get; set; }
-            public double vrz { get; set; }
+
+            // velocity body
             public double vx { get; set; }
             public double vy { get; set; }
             public double vz { get; set; }
-            public double ax { get; set; }
-            public double ay { get; set; }
-            public double az { get; set; }
+
+            // velocity world 
             public double vwx { get; set; }
             public double vwy { get; set; }
             public double vwz { get; set; }
+
+            // Velocity rotation
+            public double vrx { get; set; }
+            public double vry { get; set; }
+            public double vrz { get; set; }
+
+            // wind velocity body
+            public double wvbx { get; set; }
+            public double wvby { get; set; }
+            public double wvbz { get; set; }
+
+            // wind velocity world
+            public double wvwx { get; set; }
+            public double wvwy { get; set; }
+            public double wvwz { get; set; }
+
+            // Acceleration
+            public double ax { get; set; }
+            public double ay { get; set; }
+            public double az { get; set; }
+
+            // rotation
             public double pitch { get; set; }
             public double bank { get; set; }
             public double heading { get; set; }
+
+            // Control Surfaces
+            public double rudder { get; set; }
             public double elevator { get; set; }
             public double aileron { get; set; }
+
+            // Engines
+            public double eng_rpm { get; set; }
+            public double throttle { get; set; }
+
+            // time
+            public double time { get; set; }
         }
         
         // this is how you declare a data structure so that
@@ -192,36 +233,51 @@ namespace FSXLSTM
                 simconnect.MapClientEventToSimEvent(PAUSE_EVENTS.GEAR_DOWN, "GEAR_DOWN");
                 simconnect.MapClientEventToSimEvent(PAUSE_EVENTS.THROTTLE_SET, "THROTTLE_SET");
                 simconnect.MapClientEventToSimEvent(PAUSE_EVENTS.THROTTLE_FULL, "THROTTLE_FULL");
-                
-                
+
+                // Control1
+                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "PLANE ALT ABOVE GROUND", "feet", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
                 simconnect.AddToDataDefinition(DEFINITIONS.Control1, "Plane Altitude", "feet", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
                 
                 simconnect.AddToDataDefinition(DEFINITIONS.Control1, "INCIDENCE ALPHA", "Radians", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
                 
-                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "ROTATION VELOCITY BODY X", "radians per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
-                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "ROTATION VELOCITY BODY Y", "radians per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
-                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "ROTATION VELOCITY BODY Z", "radians per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
-
                 simconnect.AddToDataDefinition(DEFINITIONS.Control1, "VELOCITY BODY X", "feet per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
                 simconnect.AddToDataDefinition(DEFINITIONS.Control1, "VELOCITY BODY Y", "feet per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
                 simconnect.AddToDataDefinition(DEFINITIONS.Control1, "VELOCITY BODY Z", "feet per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
-
-                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "ACCELERATION BODY X", "feet per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
-                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "ACCELERATION BODY Y", "feet per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
-                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "ACCELERATION BODY Z", "feet per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
 
                 simconnect.AddToDataDefinition(DEFINITIONS.Control1, "VELOCITY WORLD X", "feet per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
                 simconnect.AddToDataDefinition(DEFINITIONS.Control1, "VELOCITY WORLD Y", "feet per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
                 simconnect.AddToDataDefinition(DEFINITIONS.Control1, "VELOCITY WORLD Z", "feet per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
 
+                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "ROTATION VELOCITY BODY X", "radians per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "ROTATION VELOCITY BODY Y", "radians per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "ROTATION VELOCITY BODY Z", "radians per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+
+                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "RELATIVE WIND VELOCITY BODY X", "feet per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "RELATIVE WIND VELOCITY BODY Y", "feet per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "RELATIVE WIND VELOCITY BODY Z", "feet per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+
+                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "AMBIENT WIND X", "Meters per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "AMBIENT WIND Y", "Meters per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "AMBIENT WIND Z", "Meters per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+
+                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "ACCELERATION BODY X", "feet per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "ACCELERATION BODY Y", "feet per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "ACCELERATION BODY Z", "feet per second", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+
                 simconnect.AddToDataDefinition(DEFINITIONS.Control1, "PLANE PITCH DEGREES", "radians", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
                 simconnect.AddToDataDefinition(DEFINITIONS.Control1, "PLANE BANK DEGREES", "radians", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
                 simconnect.AddToDataDefinition(DEFINITIONS.Control1, "PLANE HEADING DEGREES MAGNETIC", "radians", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
 
+                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "RUDDER POSITION", "", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
                 simconnect.AddToDataDefinition(DEFINITIONS.Control1, "ELEVATOR POSITION", "", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
                 simconnect.AddToDataDefinition(DEFINITIONS.Control1, "AILERON POSITION", "", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
 
+                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "GENERAL ENG RPM:1", "rpm", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
+                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "General Eng Throttle Lever Position:1", "", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
 
+                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "ABSOLUTE TIME", "", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+
+                // Surfaces
                 simconnect.AddToDataDefinition(DEFINITIONS.Surfaces, "ELEVATOR POSITION", "", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
                 simconnect.AddToDataDefinition(DEFINITIONS.Surfaces, "AILERON POSITION", "", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
 
@@ -276,28 +332,52 @@ namespace FSXLSTM
                     }
                     
                     Control1 s1 = (Control1) data.dwData[0];
-                    
+
+                    altitude_ground_v.Add(s1.altitude_ground);
                     altitude_v.Add(s1.altitude);
+
                     aoa_v.Add(s1.aoa);
-                    vrx_v.Add(s1.vrx);
-                    vry_v.Add(s1.vry);
-                    vrz_v.Add(s1.vrz);
+
                     vx_v.Add(s1.vx);
                     vy_v.Add(s1.vy);
                     vz_v.Add(s1.vz);
-                    ax_v.Add(s1.ax);
-                    ay_v.Add(s1.ay);
-                    az_v.Add(s1.az);
+
                     vwx_v.Add(s1.vwx);
                     vwy_v.Add(s1.vwy);
                     vwz_v.Add(s1.vwz);
+
+                    vrx_v.Add(s1.vrx);
+                    vry_v.Add(s1.vry);
+                    vrz_v.Add(s1.vrz);
+
+                    wvbx_v.Add(s1.wvbx);
+                    wvby_v.Add(s1.wvby);
+                    wvbz_v.Add(s1.wvbz);
+
+                    wvwx_v.Add(s1.wvwx);
+                    wvwy_v.Add(s1.wvwy);
+                    wvwz_v.Add(s1.wvwz);
+
+                    ax_v.Add(s1.ax);
+                    ay_v.Add(s1.ay);
+                    az_v.Add(s1.az);
+
                     cosine_v.Add(Math.Cos(s1.pitch));
                     sine_v.Add(Math.Sin(s1.pitch));
+
                     pitch_v.Add(s1.pitch);
                     bank_v.Add(s1.bank);
                     heading_v.Add(s1.heading);
+
+                    rudder_v.Add(s1.rudder);
                     elevator_v.Add(s1.elevator);
                     aileron_v.Add(s1.aileron);
+
+                    eng_rpm_v.Add(s1.eng_rpm);
+                    throttle_v.Add(s1.throttle);
+
+                    time_v.Add(s1.time);
+
                     x_v.Add(x);
                     y_v.Add(y);
                     z_v.Add(z);
