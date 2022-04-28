@@ -14,7 +14,7 @@ namespace FSXLSTM
     
     public partial class Form1 : Form
     {
-
+        #region VARS_DELETE
         //Args
         public int TARGET_ALTITUDE = 11000; //Altitude in feets
         
@@ -25,12 +25,15 @@ namespace FSXLSTM
         };
         
         public NN NN_TYPE = NN.ANN; // Neural network used
-        
-        
+        #endregion
+
+        #region PROGRAM_VARS
         // Program variables
         private Stopwatch sw = new Stopwatch();
         private bool simrunning = false;
+        #endregion
 
+        #region AUX_VARS
         private double x = 0;
         private double y = 0;
         private double z = 0;
@@ -84,8 +87,9 @@ namespace FSXLSTM
         List<double> x_v = new List<double>();
         List<double> y_v = new List<double>();
         List<double> z_v = new List<double>();
-        
-        
+        #endregion
+
+        #region FSX_VARS
         enum DEFINITIONS
         {
             Control1,
@@ -120,10 +124,13 @@ namespace FSXLSTM
         };
         
         const int WM_USER_SIMCONNECT = 0x0402;
+        #endregion
 
+        #region DELETE_VARS_ALSO?
         private int current = 0;
-        private int iterations = 0;
-        
+        #endregion
+
+        #region DATA_FSX
         // this is how you declare a data structure so that
         // simconnect knows how to fill it/read it.
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
@@ -195,7 +202,7 @@ namespace FSXLSTM
             
             public double throttle_2 { get; set; }
         }
-
+        #endregion
 
         // define the structure for the var you want to set
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
@@ -213,7 +220,7 @@ namespace FSXLSTM
             InitializeComponent();
         }
 
-        
+
         void connect()
         { 
             
@@ -496,6 +503,7 @@ namespace FSXLSTM
             simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Control1, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.ONCE, 0, 0, 0, 0);
         }
 
+        #region BUTTONS
         private void buttonStart(object sender, EventArgs e)
         {
             if (simconnect == null)
@@ -531,6 +539,6 @@ namespace FSXLSTM
         {
             
         }
-
+        #endregion
     }
 }
