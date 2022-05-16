@@ -1,5 +1,5 @@
 from keras.models import Sequential
-from keras.layers import LSTM, Dropout, Dense, InputLayer, Normalization
+from keras.layers import LSTM, Dropout, Dense, InputLayer
 from keras.losses import MeanSquaredError
 
 def default_model(X_train, y_train):
