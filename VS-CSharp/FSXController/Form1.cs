@@ -9,6 +9,7 @@ using NetMQ;
 using NetMQ.Sockets;
 using Newtonsoft.Json;
 using System.Text;
+using System.Threading;
 
 namespace FSXLSTM
 {
@@ -22,6 +23,7 @@ namespace FSXLSTM
         //Args
         public string MANOEUVRE = "";
         public int TARGET_ALTITUDE = 0; //Altitude in feets
+        public double INITIAL_HEADING = 0;
         public int TARGET_HEADING = 0;
         public int TARGET_MAX_ALTITUDE = 0;
         
@@ -32,7 +34,7 @@ namespace FSXLSTM
             public double TARGET_HEADING;
             public double TARGET_MAX_ALTITUDE;
 
-            public Control1 Input;
+            public Control1[] Input;
         }
 
         struct CommOutput
@@ -42,6 +44,10 @@ namespace FSXLSTM
             public double rudder;
             public double throttle;
         }
+
+        List<Control1> dataBuffer = new List<Control1>();
+        bool AIControl = false;
+        Thread ControlThread = null;
         
         #endregion
 
@@ -303,17 +309,13 @@ namespace FSXLSTM
                     }
 
                     Control1 s1 = (Control1) data.dwData[0];
+                    dataBuffer.Add(s1);
 
-                    CommInput jsonStruct = new CommInput()
+                    if (MANOEUVRE == "SteepCurve" && INITIAL_HEADING == 0)
                     {
-                        Manoeuvre = MANOEUVRE,
-                        TARGET_ALTITUDE = TARGET_ALTITUDE,
-                        TARGET_HEADING = TARGET_HEADING,
-                        TARGET_MAX_ALTITUDE = TARGET_MAX_ALTITUDE,
-                        Input = s1
-                    };
-
-                    Send(jsonStruct);
+                        INITIAL_HEADING = s1.heading;
+                    }
+                    
                     break;
 
                 default:
@@ -321,42 +323,73 @@ namespace FSXLSTM
             }
         }
 
-
-        void Send(CommInput data)
+        CommInput? BuildCommInput()
         {
+            if (dataBuffer.Count == 0) return null;
+    
+            CommInput CI = new CommInput()
+            {
+                Manoeuvre = MANOEUVRE,
+                TARGET_ALTITUDE = TARGET_ALTITUDE,
+                TARGET_HEADING = TARGET_HEADING,
+                TARGET_MAX_ALTITUDE = TARGET_MAX_ALTITUDE,
+                Input = dataBuffer.ToArray()
+            };
+            dataBuffer.Clear();
+            return CI;
+        }
 
+        void GetControls()
+        {
+            while (AIControl)
+            {
+                CommInput? CI = BuildCommInput();
+                if (CI != null)
+                {
+                    ControlFSX(SendInputReceiveOutput((CommInput)CI));
+                } else {
+                    Thread.Sleep(100);
+                }
+            }
+        }
+
+        CommOutput SendInputReceiveOutput(CommInput data)
+        {
             client.SendMultipartBytes(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data)));
 
             List<byte[]> msg = client.ReceiveMultipartBytes();
 
             string outputData = Encoding.UTF8.GetString(msg[0]);
-            CommOutput commands = JsonConvert.DeserializeObject<CommOutput>(outputData);
+            return JsonConvert.DeserializeObject<CommOutput>(outputData);
 
-            Console.WriteLine("E: {0}", commands.elevator);
-            Console.WriteLine("A: {0}", commands.aileron);
+            //Console.WriteLine("E: {0}", commands.elevator);
+            //Console.WriteLine("A: {0}", commands.aileron);
             //Console.WriteLine("T: {0}\n", throttle);
             
-            if (commands.elevator < 10)
+        }
+
+        void ControlFSX(CommOutput controls)
+        {
+            if (controls.elevator < 10)
             {
-                var elevator = new ElevatorSurface() { elevator = commands.elevator };
+                var elevator = new ElevatorSurface() { elevator = controls.elevator };
                 simconnect.SetDataOnSimObject(DEFINITIONS.ElevatorSurface, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, elevator);
             }
-            if (commands.aileron < 10)
+            if (controls.aileron < 10)
             {
-                var aileron = new AileronSurface() { aileron = commands.aileron };
+                var aileron = new AileronSurface() { aileron = controls.aileron };
                 simconnect.SetDataOnSimObject(DEFINITIONS.AileronSurface, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, aileron);
             }
-            if (commands.rudder < 10)
+            if (controls.rudder < 10)
             {
-                var rudder = new RudderSurface() { rudder = commands.rudder };
+                var rudder = new RudderSurface() { rudder = controls.rudder };
                 simconnect.SetDataOnSimObject(DEFINITIONS.RudderSurface, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, rudder);
             }
-            if (commands.throttle < 10)
+            if (controls.throttle < 10)
             {
-                var throttle = new ThrottleSurface() { throttle = commands.throttle };
+                var throttle = new ThrottleSurface() { throttle = controls.throttle };
                 simconnect.SetDataOnSimObject(DEFINITIONS.ThrottleSurface, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, throttle);
             }
-            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Control1, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.ONCE, 0, 0, 0, 0);
         }
 
         #region BUTTONS
@@ -365,13 +398,40 @@ namespace FSXLSTM
             MANOEUVRE = this.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Checked).Tag.ToString();
             switch (MANOEUVRE)
             {
+                case "Approach":
+                case "Climb":
                 case "Immelmann":
+                case "Split-S":
                     FormImmelmann formImmelmann = new FormImmelmann();
                     DialogResult dialogResult = formImmelmann.ShowDialog();
                     if (dialogResult == DialogResult.Yes)
                     {
-                        var input = formImmelmann.Controls.OfType<TextBox>().Where(i => i.Tag.ToString() == "TARGET_ALTITUDE");;
+                        var input = formImmelmann.Controls.OfType<TextBox>().Where(i => i.Tag.ToString() == "TARGET_ALTITUDE");
                         TARGET_ALTITUDE = int.Parse(input.ToList()[0].Text);
+                    }
+
+                    INITIAL_HEADING = 0; // to be initialized later when curve is called
+                    break;
+                case "HalfCubanEight":
+                    FormHalfCubanEight formHalfCubanEight = new FormHalfCubanEight();
+                    DialogResult dialogResultHalf = formHalfCubanEight.ShowDialog();
+                    if (dialogResultHalf == DialogResult.Yes)
+                    {
+                        var input = formHalfCubanEight.Controls.OfType<TextBox>().Where(i => i.Tag.ToString() == "TARGET_ALTITUDE");
+                        TARGET_ALTITUDE = int.Parse(input.ToList()[0].Text);
+                        var input2 = formHalfCubanEight.Controls.OfType<TextBox>().Where(i => i.Tag.ToString() == "MAX_ALTITUDE");
+                        TARGET_MAX_ALTITUDE = int.Parse(input2.ToList()[0].Text);
+                    }
+
+                    INITIAL_HEADING = 0; // to be initialized later when curve is called
+                    break;
+                case "SteepCurve":
+                    FormHeading formHeading = new FormHeading();
+                    DialogResult dialogResultHeading = formHeading.ShowDialog();
+                    if (dialogResultHeading == DialogResult.Yes)
+                    {
+                        var input = formHeading.Controls.OfType<TextBox>().Where(i => i.Tag.ToString() == "TARGET_ALTITUDE");
+                        TARGET_HEADING = int.Parse(input.ToList()[0].Text);
                     }
                     break;
                 default:
@@ -382,11 +442,19 @@ namespace FSXLSTM
             {
                 connect();
             }
-            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Control1, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.ONCE, 0, 0, 0, 0);
+            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Control1, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SIM_FRAME, 0, 0, 0, 0);
+
+            AIControl = true;
+            ControlThread = new Thread(() => { GetControls(); });
+            ControlThread.Start();
         }
 
         private void buttonStop_Click(object sender, EventArgs e)
         {
+            AIControl = false;
+            ControlThread.Join();
+            ControlThread = null;
+
             simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Control1, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.NEVER, 0, 0, 0, 0);
             simconnect.Dispose();
             simconnect = null;

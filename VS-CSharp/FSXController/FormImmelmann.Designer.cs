@@ -71,7 +71,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBox1);
             this.Name = "FormImmelmann";
-            this.Text = "FormImmelmann";
+            this.Text = "Form Target Altitude";
             this.ResumeLayout(false);
             this.PerformLayout();
 

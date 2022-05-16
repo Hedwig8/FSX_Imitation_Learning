@@ -312,6 +312,18 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormHeading.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormHeading.Designer.cs">
+      <DependentUpon>FormHeading.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormHalfCubanEight.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormHalfCubanEight.Designer.cs">
+      <DependentUpon>FormHalfCubanEight.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormImmelmann.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -322,6 +334,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormHeading.resx">
+      <DependentUpon>FormHeading.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormHalfCubanEight.resx">
+      <DependentUpon>FormHalfCubanEight.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormImmelmann.resx">
       <DependentUpon>FormImmelmann.cs</DependentUpon>

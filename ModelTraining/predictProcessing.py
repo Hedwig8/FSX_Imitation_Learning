@@ -2,24 +2,6 @@
 def default_features():
     pass
 
-def approach_features(ex_list):
-    new_list = []
-    for df in ex_list:
-        df['time_diff'] = df['time'].diff().shift(-1)
-        min_altitude = min(df['altitude'])
-        df['altitude_diff'] = min_altitude - df['altitude']
-        new_list.append(df[:-1])
-    return new_list
-
-def climb_features(ex_list):
-    new_list = []
-    for df in ex_list:
-        df['time_diff'] = df['time'].diff().shift(-1)
-        max_altitude = max(df['altitude'])
-        df['altitude_diff'] = max_altitude - df['altitude']
-        new_list.append(df[:-1])
-    return new_list
-
 def half_cuban_eight_features(ex_list):
     new_list = []
     for df in ex_list:
@@ -31,19 +13,15 @@ def half_cuban_eight_features(ex_list):
         new_list.append(df[:-1])
     return new_list
 
-def immelmann_features(df, max_altitude):
+def max_altitude_features(df, max_altitude):
     df['time_diff'] = df['time'].diff().shift(-1)
     df['altitude_diff'] = max_altitude - df['altitude']
     return df[:-1]
 
-def split_s_features(ex_list):
-    new_list = []
-    for df in ex_list:
-        df['time_diff'] = df['time'].diff().shift(-1)
-        min_altitude = min(df['altitude'])
-        df['altitude_diff'] = df['altitude'] - min_altitude
-        new_list.append(df[:-1])
-    return new_list
+def min_altitude_features(df, min_altitude):
+    df['time_diff'] = df['time'].diff().shift(-1)
+    df['altitude_diff'] = df['altitude'] - min_altitude
+    return df[:-1]
 
 def curve_features(ex_list):
     new_list=[]
@@ -66,10 +44,10 @@ def curve_features(ex_list):
     return new_list
 
 manoeuvre_predict_processing = {
-    'Approach': approach_features,
-    'Climb': climb_features,
+    'Approach': max_altitude_features, # OK - it was min-altitude
+    'Climb': max_altitude_features, # OK
     'HalfCubanEight': half_cuban_eight_features,
-    'Immelmann': immelmann_features, # OK
-    'Split-S': split_s_features,
+    'Immelmann': max_altitude_features, # OK
+    'Split-S': min_altitude_features, # OK - it was altitude-min
     'SteepCurve': curve_features,
 }
