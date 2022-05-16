@@ -13,9 +13,9 @@ def pandas2numpy(X_list):
 #models
 manoeuvres_controls = {
     'Immelmann': ['elevator', 'aileron'],
-    #'SteepCurve': ['elevator', 'aileron', 'rudder'],
+    'SteepCurve': ['elevator', 'aileron', 'rudder'],
     'Split-S': ['elevator', 'aileron'],
-    #'HalfCubanEight': ['elevator', 'aileron'],
+    'HalfCubanEight': ['elevator', 'aileron'],
     'Climb': ['elevator'],
     'Approach': ['elevator', 'throttle'],
     
@@ -55,12 +55,13 @@ while True:
     if(len(dataset.index) > 15):
         df_16 = dataset[-16:].copy()
 
-        # if SteepCurve
-        # TODO
-        # elif HalfCubanEight
-        # TODO
-        # else
-        X = manoeuvre_predict_processing[manoeuvre_name](df_16, comm_data['TARGET_ALTITUDE']) 
+        X = [] # different parameters and parameters number
+        if manoeuvre_name == 'SteepCurve':
+            X = manoeuvre_predict_processing[manoeuvre_name](df_16, comm_data['TARGET_HEADING'], comm_data['INITIAL_HEADING'])
+        elif manoeuvre_name == 'HalfCubanEight':
+            X = manoeuvre_predict_processing[manoeuvre_name](df_16, comm_data['TARGET_ALTITUDE'], comm_data['TARGET_MAX_ALTITUDE'])
+        else:
+            X = manoeuvre_predict_processing[manoeuvre_name](df_16, comm_data['TARGET_ALTITUDE']) 
 
         for surface in manoeuvres_controls[manoeuvre_name]:
             X_surface, y = manoeuvre_data[manoeuvre_name][surface]([X]) 

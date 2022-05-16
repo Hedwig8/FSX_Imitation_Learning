@@ -31,8 +31,9 @@ namespace FSXLSTM
         {
             public string Manoeuvre;
             public double TARGET_ALTITUDE;
-            public double TARGET_HEADING;
             public double TARGET_MAX_ALTITUDE;
+            public double TARGET_HEADING;
+            public double INITIAL_HEADING;
 
             public Control1[] Input;
         }
@@ -333,6 +334,7 @@ namespace FSXLSTM
                 TARGET_ALTITUDE = TARGET_ALTITUDE,
                 TARGET_HEADING = TARGET_HEADING,
                 TARGET_MAX_ALTITUDE = TARGET_MAX_ALTITUDE,
+                INITIAL_HEADING = INITIAL_HEADING,
                 Input = dataBuffer.ToArray()
             };
             dataBuffer.Clear();
