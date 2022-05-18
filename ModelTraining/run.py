@@ -57,7 +57,7 @@ for manoeuvre_name, controls in manoeuvres_controls.items():
         # returns list of chosen features for X and outputs y
         X_train, y_train = manoeuvre_data[manoeuvre_name][control_surface](examples_train)
         X_test, y_test = manoeuvre_data[manoeuvre_name][control_surface](examples_test)
-        
+
         # returns np.array of inputs, each a window of X size
         X, y = manoeuvre_dataset_2_input[manoeuvre_name](X_train, y_train)
 
@@ -75,7 +75,7 @@ for manoeuvre_name, controls in manoeuvres_controls.items():
         callback = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=3, mode='min')
 
         # training
-        history = model.fit(X, y, epochs=100, batch_size=32, validation_split=0.2, callbacks=[callback])
+        history = model.fit(X, y, epochs=100, batch_size=64, validation_split=0.2, callbacks=[callback])
 
         # test predictions
         X_predict, y_true_val = manoeuvre_dataset_2_input[manoeuvre_name](X_test, y_test)

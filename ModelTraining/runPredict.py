@@ -13,11 +13,11 @@ def pandas2numpy(X_list):
 #models
 manoeuvres_controls = {
     'Immelmann': ['elevator', 'aileron'],
-    'SteepCurve': ['elevator', 'aileron', 'rudder'],
-    'Split-S': ['elevator', 'aileron'],
-    'HalfCubanEight': ['elevator', 'aileron'],
-    'Climb': ['elevator'],
-    'Approach': ['elevator', 'throttle'],
+    #'SteepCurve': ['elevator', 'aileron', 'rudder'],
+    #'Split-S': ['elevator', 'aileron'],
+    #'HalfCubanEight': ['elevator', 'aileron'],
+    #'Climb': ['elevator'],
+    #'Approach': ['elevator', 'throttle'],
     
     #'TaxiRun&TakeOff': [],
     #'Landing': [],
@@ -41,7 +41,7 @@ socket.bind("tcp://*:65432")
 print("Ready to accept")
 
 while True:
-    comm_data = socket.recv_json()
+    comm_data = socket.recv_json() # block execution, program needs too be shut down with task manager
     if not comm_data:
         print("not data")
         break

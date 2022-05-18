@@ -35,8 +35,8 @@ def immelmann_features(ex_list):
     new_list = []
     for df in ex_list:
         df['time_diff'] = df['time'].diff().shift(-1)
-        max_altitude = max(df['altitude'])
-        df['altitude_diff'] = max_altitude - df['altitude']
+        final_altitude = df['altitude'].loc[-1]
+        df['altitude_diff'] = final_altitude - df['altitude']
         new_list.append(df[:-1])
     return new_list
 
