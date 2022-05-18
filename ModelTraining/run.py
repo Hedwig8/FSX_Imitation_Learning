@@ -11,7 +11,7 @@ import numpy as np
 from featureCalculation import manoeuvre_feature_calculation
 from dataConsidered import manoeuvre_data
 from models import manoeuvre_model
-from dataset2input import manoeuvre_dataset_2_input
+from dataset2input import manoeuvre_dataset_2_input, manoeuvre_window_size
 
 dataset_path = "../ProcessedDataset"
 id = "*"
@@ -21,9 +21,9 @@ trained_models_path = "../TrainedModels"
 
 # combinations of manoeuvers and control surfaces
 manoeuvres_controls = {
-    'Immelmann': ['elevator', 'aileron'],
+    #'Immelmann': ['elevator', 'aileron'],
     #'SteepCurve': ['elevator', 'aileron', 'rudder'],
-    #'Split-S': ['elevator', 'aileron'],
+    'Split-S': ['elevator', 'aileron'],
     #'HalfCubanEight': ['elevator', 'aileron'],
     #'Climb': ['elevator'],
     #'Approach': ['elevator', 'throttle'],
@@ -59,7 +59,7 @@ for manoeuvre_name, controls in manoeuvres_controls.items():
         X_test, y_test = manoeuvre_data[manoeuvre_name][control_surface](examples_test)
 
         # returns np.array of inputs, each a window of X size
-        X, y = manoeuvre_dataset_2_input[manoeuvre_name](X_train, y_train)
+        X, y = manoeuvre_dataset_2_input[manoeuvre_name](X_train, y_train, manoeuvre_window_size[manoeuvre_name])
 
         # apply scaler and save in file
         scaler = MinMaxScaler()

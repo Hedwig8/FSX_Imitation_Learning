@@ -2,8 +2,7 @@ import numpy as np
 
 # input: list of df
 # output: data organized accordingly to window of specified size
-def default_features(X_list, y_list):
-    window = 15
+def default_features(X_list, y_list, window):
     X_final = np.empty(shape=(0, window, X_list[0].shape[1]), dtype=np.float32)
     y_final = np.empty(shape=(0))
     for X_i, X in enumerate(X_list):
@@ -21,4 +20,13 @@ manoeuvre_dataset_2_input = {
     'Immelmann': default_features,
     'Split-S': default_features,
     'SteepCurve': default_features,
+}
+
+manoeuvre_window_size = {
+    'Approach': 15,
+    'Climb': 15,
+    'HalfCubanEight': 15,
+    'Immelmann': 15,
+    'Split-S': 15,
+    'SteepCurve': 15,
 }
