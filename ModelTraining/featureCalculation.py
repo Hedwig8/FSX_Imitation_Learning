@@ -44,8 +44,8 @@ def split_s_features(ex_list):
     new_list = []
     for df in ex_list:
         df['time_diff'] = df['time'].diff().shift(-1)
-        min_altitude = min(df['altitude'])
-        df['altitude_diff'] = df['altitude'] - min_altitude
+        final_altitude = df['altitude'].iloc[-1]
+        df['altitude_diff'] = df['altitude'] - final_altitude
         new_list.append(df[:-1])
     return new_list
 
