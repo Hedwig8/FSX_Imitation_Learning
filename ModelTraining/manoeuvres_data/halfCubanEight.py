@@ -1,6 +1,6 @@
 
 def elevator_control(examples_list):
-    features = ['angle_of_attack', 'pitch', 'bank', 'velocity_world_y', 'velocity_body_z']
+    features = ['angle_of_attack', 'pitch', 'bank', 'velocity_world_y', 'velocity_body_z', 'aileron']
     new_listX = []
     new_listy = []
     for df in examples_list:
