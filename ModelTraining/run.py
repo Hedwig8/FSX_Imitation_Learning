@@ -24,7 +24,7 @@ manoeuvres_controls = {
     #'Immelmann': ['elevator', 'aileron'],
     #'SteepCurve': ['elevator', 'aileron', 'rudder'],
     'Split-S': ['elevator', 'aileron'],
-    #'HalfCubanEight': ['elevator', 'aileron'],
+    'HalfCubanEight': ['elevator', 'aileron'],
     #'Climb': ['elevator'],
     #'Approach': ['elevator', 'throttle'],
     
@@ -78,7 +78,7 @@ for manoeuvre_name, controls in manoeuvres_controls.items():
         history = model.fit(X, y, epochs=100, batch_size=64, validation_split=0.2, callbacks=[callback])
 
         # test predictions
-        X_predict, y_true_val = manoeuvre_dataset_2_input[manoeuvre_name](X_test, y_test)
+        X_predict, y_true_val = manoeuvre_dataset_2_input[manoeuvre_name](X_test, y_test, manoeuvre_window_size[manoeuvre_name])
         original_shape_test = X_predict.shape
         reshaped_X_predict = np.reshape(X_predict, (-1, original_shape_test[1] * original_shape_test[2]))
         scaled_X_predict = scaler.transform(reshaped_X_predict)
