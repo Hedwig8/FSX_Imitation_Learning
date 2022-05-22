@@ -17,6 +17,7 @@ def climb_features(ex_list):
         df['time_diff'] = df['time'].diff().shift(-1)
         max_altitude = max(df['altitude'])
         df['altitude_diff'] = max_altitude - df['altitude']
+        df['climb_rate'] = df['altitude'].diff().shift(-1)
         new_list.append(df[:-1])
     return new_list
 
@@ -53,6 +54,9 @@ def curve_features(ex_list):
     new_list=[]
     for df in ex_list:
         df['time_diff'] = df['time'].diff().shift(-1)
+        df['acc_rot_body_x'] = df['velocity_rot_body_x'].diff().shift(-1)
+        df['acc_rot_body_y'] = df['velocity_rot_body_y'].diff().shift(-1)
+        df['acc_rot_body_z'] = df['velocity_rot_body_z'].diff().shift(-1)
         # heading delta calculation
         # start from the last timeframe to the beginning
         # accounting for all edge cases

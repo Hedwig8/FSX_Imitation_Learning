@@ -1,6 +1,6 @@
 
 def elevator_control(examples_list):
-    features = ['angle_of_attack', 'pitch', 'bank', 'heading', 'velocity_world_y', 'velocity_body_z', 'velocity_body_x', 'velocity_rot_body_z', 'velocity_rot_body_x', 'time_diff', 'elevator', 'aileron', 'rudder']
+    features = ['angle_of_attack', 'pitch', 'bank', 'heading', 'velocity_rot_body_x', 'acc_rot_body_x', 'heading_diff']
     new_listX = []
     new_listy = []
     for df in examples_list:
@@ -9,7 +9,7 @@ def elevator_control(examples_list):
     return new_listX, new_listy
 
 def aileron_control(examples_list):
-    features = ['angle_of_attack', 'pitch', 'bank', 'heading', 'velocity_world_y', 'velocity_body_z', 'velocity_body_x', 'velocity_rot_body_z', 'velocity_rot_body_x', 'time_diff', 'elevator', 'aileron', 'rudder']
+    features = ['angle_of_attack', 'pitch', 'bank', 'heading', 'velocity_rot_body_z', 'acc_rot_body_z', 'heading_diff']
     new_listX = []
     new_listy = []
     for df in examples_list:
@@ -18,7 +18,7 @@ def aileron_control(examples_list):
     return new_listX, new_listy
 
 def rudder_control(examples_list):
-    features = ['angle_of_attack', 'pitch', 'bank', 'heading', 'velocity_world_y', 'velocity_body_z', 'velocity_body_x', 'velocity_rot_body_z', 'velocity_rot_body_x', 'time_diff', 'elevator', 'aileron', 'rudder']
+    features = ['angle_of_attack', 'pitch', 'bank', 'heading', 'velocity_rot_body_y', 'acc_rot_body_y', 'heading_diff']
     new_listX = []
     new_listy = []
     for df in examples_list:
