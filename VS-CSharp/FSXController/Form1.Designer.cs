@@ -37,11 +37,12 @@
             this.radioButton4 = new System.Windows.Forms.RadioButton();
             this.radioButton5 = new System.Windows.Forms.RadioButton();
             this.radioButton6 = new System.Windows.Forms.RadioButton();
+            this.radioButton7 = new System.Windows.Forms.RadioButton();
             this.SuspendLayout();
             // 
             // start
             // 
-            this.start.Location = new System.Drawing.Point(10, 205);
+            this.start.Location = new System.Drawing.Point(10, 236);
             this.start.Margin = new System.Windows.Forms.Padding(4);
             this.start.Name = "start";
             this.start.Size = new System.Drawing.Size(156, 37);
@@ -52,7 +53,7 @@
             // 
             // bStop
             // 
-            this.bStop.Location = new System.Drawing.Point(174, 205);
+            this.bStop.Location = new System.Drawing.Point(174, 236);
             this.bStop.Margin = new System.Windows.Forms.Padding(4);
             this.bStop.Name = "bStop";
             this.bStop.Size = new System.Drawing.Size(156, 37);
@@ -133,11 +134,24 @@
             this.radioButton6.Text = "Descent";
             this.radioButton6.UseVisualStyleBackColor = true;
             // 
+            // radioButton7
+            // 
+            this.radioButton7.AutoSize = true;
+            this.radioButton7.Location = new System.Drawing.Point(40, 195);
+            this.radioButton7.Name = "radioButton7";
+            this.radioButton7.Size = new System.Drawing.Size(126, 20);
+            this.radioButton7.TabIndex = 15;
+            this.radioButton7.TabStop = true;
+            this.radioButton7.Tag = "AltitudeChanger";
+            this.radioButton7.Text = "Altitude Changer";
+            this.radioButton7.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(343, 250);
+            this.ClientSize = new System.Drawing.Size(343, 286);
+            this.Controls.Add(this.radioButton7);
             this.Controls.Add(this.radioButton6);
             this.Controls.Add(this.radioButton5);
             this.Controls.Add(this.radioButton4);
@@ -166,5 +180,6 @@
         private System.Windows.Forms.RadioButton radioButton4;
         private System.Windows.Forms.RadioButton radioButton5;
         private System.Windows.Forms.RadioButton radioButton6;
+        private System.Windows.Forms.RadioButton radioButton7;
     }
 }

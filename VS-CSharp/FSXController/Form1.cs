@@ -400,6 +400,7 @@ namespace FSXLSTM
             MANOEUVRE = this.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Checked).Tag.ToString();
             switch (MANOEUVRE)
             {
+                case "AltitudeChanger":
                 case "Approach":
                 case "Climb":
                 case "Immelmann":

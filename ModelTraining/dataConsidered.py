@@ -4,6 +4,7 @@ from manoeuvres_data.halfCubanEight import half_cuban_eight_controls
 from manoeuvres_data.immelmann import immelmann_controls
 from manoeuvres_data.splitS import split_s_controls
 from manoeuvres_data.curve import curve_controls
+from manoeuvres_data.altitudeChanger import altitude_changer_controls
 
 manoeuvre_data = {
     'Approach': approach_controls,
@@ -12,4 +13,5 @@ manoeuvre_data = {
     'Immelmann': immelmann_controls,
     'Split-S': split_s_controls,
     'SteepCurve': curve_controls,
+    'AltitudeChanger': altitude_changer_controls,
 }

@@ -42,4 +42,5 @@ manoeuvre_predict_processing = {
     'Immelmann': max_altitude_features, # OK
     'Split-S': min_altitude_features, # OK - it was altitude-min
     'SteepCurve': curve_features,
+    'AltitudeChanger': max_altitude_features,
 }

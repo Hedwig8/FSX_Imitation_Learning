@@ -20,6 +20,7 @@ manoeuvre_dataset_2_input = {
     'Immelmann': default_features,
     'Split-S': default_features,
     'SteepCurve': default_features,
+    'AltitudeChanger': default_features,
 }
 
 manoeuvre_window_size = {
@@ -29,4 +30,5 @@ manoeuvre_window_size = {
     'Immelmann': 15,
     'Split-S': 15,
     'SteepCurve': 15,
+    'AltitudeChanger': 15,
 }
