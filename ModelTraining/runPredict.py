@@ -7,18 +7,20 @@ from predictProcessing import manoeuvre_predict_processing
 from dataConsidered import manoeuvre_data
 from dataset2input import manoeuvre_window_size
 
-def pandas2numpy(X_list):
-    #X_final = np.empty(shape=(0, X_list[0].shape[0], X_list[0].shape[1]), dtype=np.float32)
+def pandas2numpy(X_list, manoeuvre):
+    if manoeuvre == 'Climb' or manoeuvre == 'SteepCurve':
+        return np.array(X_list[0])
     return np.array([X_list[0]])
 
 #models
 manoeuvres_controls = {
     #'Immelmann': ['elevator', 'aileron'],
-    #'SteepCurve': ['elevator', 'aileron', 'rudder'],
-    'Split-S': ['elevator', 'aileron'],
-    'HalfCubanEight': ['elevator', 'aileron'],
-    #'Climb': ['elevator'],
+    'SteepCurve': ['elevator', 'aileron', 'rudder'],
+    #'Split-S': ['elevator', 'aileron'],
+    #'HalfCubanEight': ['elevator', 'aileron'],
+    'Climb': ['elevator'],
     #'Approach': ['elevator', 'throttle'],
+    #'AltitudeChanger': ['elevator'],
     
     #'TaxiRun&TakeOff': [],
     #'Landing': [],
@@ -67,15 +69,18 @@ while True:
 
         for surface in manoeuvres_controls[manoeuvre_name]:
             X_surface, y = manoeuvre_data[manoeuvre_name][surface]([X]) 
-            X_surface = pandas2numpy(X_surface)
+            X_surface = pandas2numpy(X_surface, manoeuvre=manoeuvre_name)
 
             # apply reshape to scale the data
+            reshaped_X = X_surface
             original_shape = X_surface.shape
-            reshaped_X = np.reshape(X_surface, (-1, original_shape[1] * original_shape[2]))
+            if len(original_shape) == 3:
+                reshaped_X = np.reshape(X_surface, (-1, original_shape[1] * original_shape[2]))
             scaled_X = scalers[manoeuvre_name][surface].transform(reshaped_X)
-            X_predict = np.reshape(scaled_X, original_shape)
+            if len(original_shape) == 3:
+                scaled_X = np.reshape(scaled_X, original_shape)
 
-            outputs[surface] = float(models[manoeuvre_name][surface].predict(X_predict)[0][0])
+            outputs[surface] = float(models[manoeuvre_name][surface].predict(scaled_X)[0][0])
     print(outputs)
 
     socket.send_json(outputs)

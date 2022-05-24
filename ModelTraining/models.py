@@ -16,12 +16,21 @@ def default_model(X_train, y_train):
     model.compile(optimizer=opt, loss=MeanSquaredError())
     return model
 
+def curve_model(X_train, y_train):
+    model = Sequential()
+    model.add(InputLayer(input_shape=(X_train.shape[1])))
+    model.add(Dense(X_train.shape[1]))
+    model.add(Dense(1))
+    opt = Adam(learning_rate=0.002)
+    model.compile(optimizer=opt, loss=MeanSquaredError())
+    return model
+
 manoeuvre_model = {
     'Approach': default_model,
-    'Climb': default_model,
+    'Climb': curve_model,
     'HalfCubanEight': default_model,
     'Immelmann': default_model,
     'Split-S': default_model,
-    'SteepCurve': default_model
+    'SteepCurve': curve_model
 }
 

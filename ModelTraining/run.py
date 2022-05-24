@@ -22,12 +22,14 @@ trained_models_path = "../TrainedModels"
 # combinations of manoeuvers and control surfaces
 manoeuvres_controls = {
     #'Immelmann': ['elevator', 'aileron'],
-    #'SteepCurve': ['elevator', 'aileron', 'rudder'],
-    'Split-S': ['elevator', 'aileron'],
-    'HalfCubanEight': ['elevator', 'aileron'],
-    #'Climb': ['elevator'],
+    #'Split-S': ['elevator', 'aileron'],
+    #'HalfCubanEight': ['elevator', 'aileron'],
+    'Climb': ['elevator'],
     #'Approach': ['elevator', 'throttle'],
     
+    #'SteepCurve': ['elevator', 'aileron', 'rudder'],
+    'SteepCurve': ['elevator', 'aileron'],
+
     #'TaxiRun&TakeOff': [],
     #'Landing': [],
     #'Roll': [], #aileron, elevator?
@@ -54,6 +56,7 @@ for manoeuvre_name, controls in manoeuvres_controls.items():
     examples_test = manoeuvre_feature_calculation[manoeuvre_name](examples_test)
     
     for control_surface in controls:
+        print(manoeuvre_name, control_surface)
         # returns list of chosen features for X and outputs y
         X_train, y_train = manoeuvre_data[manoeuvre_name][control_surface](examples_train)
         X_test, y_test = manoeuvre_data[manoeuvre_name][control_surface](examples_test)
@@ -63,27 +66,33 @@ for manoeuvre_name, controls in manoeuvres_controls.items():
 
         # apply scaler and save in file
         scaler = MinMaxScaler()
+        reshaped_X = X
         original_shape_train = X.shape
-        reshaped_X = np.reshape(X, (-1, original_shape_train[1] * original_shape_train[2]))
-        scaled_X = scaler.fit_transform(reshaped_X) # reshaped because scaler only accepts 2D array
-        X = np.reshape(scaled_X, original_shape_train)
+        if len(original_shape_train) == 3:
+            reshaped_X = np.reshape(X, (-1, original_shape_train[1] * original_shape_train[2])) # reshaped because scaler only accepts 2D array
+        scaled_X = scaler.fit_transform(reshaped_X)
+        if len(original_shape_train) == 3:
+            scaled_X = np.reshape(scaled_X, original_shape_train)
 
         dump(scaler, f'{trained_models_path}/{manoeuvre_name}/{control_surface}.scaler')
 
         # model
-        model = manoeuvre_model[manoeuvre_name](X, y)
-        callback = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=3, mode='min')
+        model = manoeuvre_model[manoeuvre_name](scaled_X, y)
+        callback = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=2, mode='min')
 
         # training
-        history = model.fit(X, y, epochs=100, batch_size=64, validation_split=0.2, callbacks=[callback])
+        history = model.fit(scaled_X, y, epochs=100, batch_size=64, validation_split=0.2, callbacks=[callback])
 
         # test predictions
         X_predict, y_true_val = manoeuvre_dataset_2_input[manoeuvre_name](X_test, y_test, manoeuvre_window_size[manoeuvre_name])
+        reshaped_X_predict = X_predict
         original_shape_test = X_predict.shape
-        reshaped_X_predict = np.reshape(X_predict, (-1, original_shape_test[1] * original_shape_test[2]))
+        if len(original_shape_test) == 3:
+            reshaped_X_predict = np.reshape(X_predict, (-1, original_shape_test[1] * original_shape_test[2]))
         scaled_X_predict = scaler.transform(reshaped_X_predict)
-        X_predict = np.reshape(scaled_X_predict, original_shape_test)
-        predictions = model.predict(X_predict)
+        if len(original_shape_test) == 3:
+            scaled_X_predict = np.reshape(scaled_X_predict, original_shape_test)
+        predictions = model.predict(scaled_X_predict)
 
         # model training and testing data stored on file
         history_dict = { f'{manoeuvre_name}_{control_surface}':{
