@@ -24,11 +24,11 @@ manoeuvres_controls = {
     #'Immelmann': ['elevator', 'aileron'],
     #'Split-S': ['elevator', 'aileron'],
     #'HalfCubanEight': ['elevator', 'aileron'],
-    'Climb': ['elevator'],
+    #'Climb': ['elevator'],
     #'Approach': ['elevator', 'throttle'],
     
     #'SteepCurve': ['elevator', 'aileron', 'rudder'],
-    'SteepCurve': ['elevator', 'aileron'],
+    'SteepCurve': ['rudder'],
 
     #'TaxiRun&TakeOff': [],
     #'Landing': [],
@@ -56,7 +56,6 @@ for manoeuvre_name, controls in manoeuvres_controls.items():
     examples_test = manoeuvre_feature_calculation[manoeuvre_name](examples_test)
     
     for control_surface in controls:
-        print(manoeuvre_name, control_surface)
         # returns list of chosen features for X and outputs y
         X_train, y_train = manoeuvre_data[manoeuvre_name][control_surface](examples_train)
         X_test, y_test = manoeuvre_data[manoeuvre_name][control_surface](examples_test)

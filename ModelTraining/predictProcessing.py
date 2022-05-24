@@ -1,3 +1,5 @@
+from math import pi as PI
+
 
 def default_features():
     pass
@@ -31,7 +33,7 @@ def curve_features(df, final_heading):
     heading_diff = []
     for heading in df['heading']:
         diff = final_heading - heading
-        heading_diff.append(diff + 360 if diff < -180 else diff - 360 if diff > 180 else diff)
+        heading_diff.append(diff + PI*2 if diff < -PI else diff - PI*2 if diff > PI else diff)
     df['heading_diff'] = heading_diff
     return df[1:]
 

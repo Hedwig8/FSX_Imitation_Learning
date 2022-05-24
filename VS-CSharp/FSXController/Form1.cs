@@ -22,10 +22,10 @@ namespace FSXLSTM
         #region VARS
         //Args
         public string MANOEUVRE = "";
-        public int TARGET_ALTITUDE = 0; //Altitude in feets
+        public double TARGET_ALTITUDE = 0; //Altitude in feets
         public double INITIAL_HEADING = 0;
-        public int TARGET_HEADING = 0;
-        public int TARGET_MAX_ALTITUDE = 0;
+        public double TARGET_HEADING = 0;
+        public double TARGET_MAX_ALTITUDE = 0;
         
         struct CommInput
         {
@@ -410,7 +410,7 @@ namespace FSXLSTM
                     if (dialogResult == DialogResult.Yes)
                     {
                         var input = formImmelmann.Controls.OfType<TextBox>().Where(i => i.Tag.ToString() == "TARGET_ALTITUDE");
-                        TARGET_ALTITUDE = int.Parse(input.ToList()[0].Text);
+                        TARGET_ALTITUDE = double.Parse(input.ToList()[0].Text);
                     }
 
                     INITIAL_HEADING = 0; // to be initialized later when curve is called
@@ -421,9 +421,9 @@ namespace FSXLSTM
                     if (dialogResultHalf == DialogResult.Yes)
                     {
                         var input = formHalfCubanEight.Controls.OfType<TextBox>().Where(i => i.Tag.ToString() == "TARGET_ALTITUDE");
-                        TARGET_ALTITUDE = int.Parse(input.ToList()[0].Text);
+                        TARGET_ALTITUDE = double.Parse(input.ToList()[0].Text);
                         var input2 = formHalfCubanEight.Controls.OfType<TextBox>().Where(i => i.Tag.ToString() == "MAX_ALTITUDE");
-                        TARGET_MAX_ALTITUDE = int.Parse(input2.ToList()[0].Text);
+                        TARGET_MAX_ALTITUDE = double.Parse(input2.ToList()[0].Text);
                     }
 
                     INITIAL_HEADING = 0; // to be initialized later when curve is called
@@ -434,7 +434,7 @@ namespace FSXLSTM
                     if (dialogResultHeading == DialogResult.Yes)
                     {
                         var input = formHeading.Controls.OfType<TextBox>().Where(i => i.Tag.ToString() == "TARGET_ALTITUDE");
-                        TARGET_HEADING = int.Parse(input.ToList()[0].Text);
+                        TARGET_HEADING = Degrees2Radians(double.Parse(input.ToList()[0].Text));
                     }
                     break;
                 default:
@@ -482,6 +482,11 @@ namespace FSXLSTM
         private void Form1_Load(object sender, EventArgs e)
         {
             
+        }
+
+        private double Degrees2Radians(double degree)
+        {
+            return (degree * Math.PI / 180);
         }
         #endregion
     }

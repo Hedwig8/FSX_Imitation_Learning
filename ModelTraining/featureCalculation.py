@@ -1,3 +1,4 @@
+from math import pi as PI
 
 def default_features():
     pass
@@ -66,7 +67,7 @@ def curve_features(ex_list):
         heading_diff = []
         for i in reversed(df.index):
             diff = last_heading - df['heading'][i]
-            accumulated_heading_diff += diff + 360 if diff < -180 else diff - 360 if diff > 180 else diff
+            accumulated_heading_diff += diff + PI*2 if diff < -PI else diff - PI*2 if diff > PI else diff
             heading_diff.append(accumulated_heading_diff)
             last_heading = df['heading'][i]
         heading_diff.reverse()

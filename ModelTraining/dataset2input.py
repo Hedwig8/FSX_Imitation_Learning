@@ -28,7 +28,7 @@ manoeuvre_dataset_2_input = {
     'HalfCubanEight': default_features,
     'Immelmann': default_features,
     'Split-S': default_features,
-    'SteepCurve': curve_preparation,
+    'SteepCurve': default_features,
     'AltitudeChanger': default_features,
 }
 
@@ -38,6 +38,6 @@ manoeuvre_window_size = {
     'HalfCubanEight': 15,
     'Immelmann': 15,
     'Split-S': 15,
-    'SteepCurve': 1,
+    'SteepCurve': 15,
     'AltitudeChanger': 15,
 }
