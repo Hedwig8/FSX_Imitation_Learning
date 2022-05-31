@@ -38,6 +38,8 @@
             this.radioButton5 = new System.Windows.Forms.RadioButton();
             this.radioButton6 = new System.Windows.Forms.RadioButton();
             this.radioButton7 = new System.Windows.Forms.RadioButton();
+            this.manoeuvreCircuit = new System.Windows.Forms.Button();
+            this.stopManoeuvreCircuit = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // start
@@ -146,11 +148,33 @@
             this.radioButton7.Text = "Altitude Changer";
             this.radioButton7.UseVisualStyleBackColor = true;
             // 
+            // manoeuvreCircuit
+            // 
+            this.manoeuvreCircuit.Location = new System.Drawing.Point(10, 307);
+            this.manoeuvreCircuit.Name = "manoeuvreCircuit";
+            this.manoeuvreCircuit.Size = new System.Drawing.Size(320, 34);
+            this.manoeuvreCircuit.TabIndex = 16;
+            this.manoeuvreCircuit.Text = "Start Manoeuvre Circuit";
+            this.manoeuvreCircuit.UseVisualStyleBackColor = true;
+            this.manoeuvreCircuit.Click += new System.EventHandler(this.manoeuvreCircuit_Click);
+            // 
+            // stopManoeuvreCircuit
+            // 
+            this.stopManoeuvreCircuit.Location = new System.Drawing.Point(10, 347);
+            this.stopManoeuvreCircuit.Name = "stopManoeuvreCircuit";
+            this.stopManoeuvreCircuit.Size = new System.Drawing.Size(320, 34);
+            this.stopManoeuvreCircuit.TabIndex = 17;
+            this.stopManoeuvreCircuit.Text = "Stop Manoeuvre Circuit";
+            this.stopManoeuvreCircuit.UseVisualStyleBackColor = true;
+            this.stopManoeuvreCircuit.Click += new System.EventHandler(this.stopManoeuvreCircuit_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(343, 286);
+            this.ClientSize = new System.Drawing.Size(343, 393);
+            this.Controls.Add(this.stopManoeuvreCircuit);
+            this.Controls.Add(this.manoeuvreCircuit);
             this.Controls.Add(this.radioButton7);
             this.Controls.Add(this.radioButton6);
             this.Controls.Add(this.radioButton5);
@@ -181,5 +205,7 @@
         private System.Windows.Forms.RadioButton radioButton5;
         private System.Windows.Forms.RadioButton radioButton6;
         private System.Windows.Forms.RadioButton radioButton7;
+        private System.Windows.Forms.Button manoeuvreCircuit;
+        private System.Windows.Forms.Button stopManoeuvreCircuit;
     }
 }

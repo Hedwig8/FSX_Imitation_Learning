@@ -27,8 +27,8 @@ manoeuvres_controls = {
     #'Climb': ['elevator'],
     #'Approach': ['elevator', 'throttle'],
     
-    #'SteepCurve': ['elevator', 'aileron', 'rudder'],
-    'SteepCurve': ['rudder'],
+    'SteepCurve': ['elevator', 'aileron', 'rudder'],
+    #'SteepCurve': ['rudder'],
 
     #'TaxiRun&TakeOff': [],
     #'Landing': [],

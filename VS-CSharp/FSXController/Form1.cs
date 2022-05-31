@@ -17,8 +17,6 @@ namespace FSXLSTM
     public partial class Form1 : Form
     {
 
-
-
         #region VARS
         //Args
         public string MANOEUVRE = "";
@@ -49,6 +47,10 @@ namespace FSXLSTM
         List<Control1> dataBuffer = new List<Control1>();
         bool AIControl = false;
         Thread ControlThread = null;
+
+        List<Control1> controlBuffer = new List<Control1>();
+        bool CircuitControl = false;
+        Thread CircuitControlThread = null;
         
         #endregion
 
@@ -64,7 +66,9 @@ namespace FSXLSTM
             RudderSurface,
             AileronSurface,
             ThrottleSurface,
-            ElevatorSurface
+            ElevatorSurface,
+
+            SIMCONNECT_DATA_WAYPOINT
         }
 
         enum DATA_REQUESTS
@@ -158,6 +162,9 @@ namespace FSXLSTM
             //Current time
 
             public double time { get; set; }
+
+            public double latitude { get; set; }
+            public double longitude { get; set; }
 
         };
 
@@ -268,6 +275,9 @@ namespace FSXLSTM
 
                 simconnect.AddToDataDefinition(DEFINITIONS.Control1, "ABSOLUTE TIME", "", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
 
+                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "PLANE LATITUDE", "degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+                simconnect.AddToDataDefinition(DEFINITIONS.Control1, "PLANE LONGITUDE", "degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+
                 // Surfaces
                 simconnect.AddToDataDefinition(DEFINITIONS.ElevatorSurface, "ELEVATOR POSITION", "", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
                 simconnect.AddToDataDefinition(DEFINITIONS.AileronSurface, "AILERON POSITION", "", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
@@ -310,7 +320,11 @@ namespace FSXLSTM
                     }
 
                     Control1 s1 = (Control1) data.dwData[0];
-                    dataBuffer.Add(s1);
+                    if (AIControl) dataBuffer.Add(s1);
+                    if (CircuitControl) controlBuffer.Add(s1);
+
+                    if (MANOEUVRE == "Immelmann")
+                        Console.WriteLine(Utils.IsStable(s1.pitch, s1.bank));
 
                     if (MANOEUVRE == "SteepCurve" && INITIAL_HEADING == 0)
                     {
@@ -323,6 +337,129 @@ namespace FSXLSTM
                     break;
             }
         }
+
+        #region CircuitControl
+
+        Control1[] GetControlBuffer()
+        {
+            if (controlBuffer.Count == 0) return new Control1[] {};
+
+            var lastControls = controlBuffer.ToArray();
+            controlBuffer.Clear();
+            return lastControls;
+        }
+        
+        // checks if all controls structs are in stable position (prevent false stability)
+        bool IsCommInputStable(Control1[] controls)
+        {
+            foreach (Control1 control in controls)
+            {
+                if (!Utils.IsStable(control.pitch, control.bank)) return false;
+            }
+
+            return true;
+        }
+
+        string NextCircuitManoeuvre(string current)
+        {
+            switch (current)
+            {
+                // Immelmann
+                case "Start":
+                    return "Immelmann";
+                case "Immelmann":
+                    return "StraightFlight1";
+                // HalfCubanEight
+                case "StraightFlight1":
+                    return "HalfCubanEight";
+                case "HalfCubanEight":
+                    return "StraightFlight2";
+                // Split-S
+                case "StraightFlight2":
+                    return "Split-S";
+                case "Split-S":
+
+                default:
+                    return "End";
+            }
+        }
+
+        void StraightFlight(Control1 position)
+        {
+            double[] DestinationPoint = Utils.calculateDestinationPosition(
+                position.latitude, position.longitude, 
+                position.altitude * 0.3048, // foot to meter 
+                position.heading, 
+                1000);
+
+            Console.WriteLine("Position: " + position.latitude + ", " + position.longitude);
+            Console.WriteLine("End Position: " + DestinationPoint[0] + ", " + DestinationPoint[1]);
+            
+            GoToPoint(DestinationPoint[0], DestinationPoint[1], position.altitude);
+        }
+
+        void CircuitControlLoop()
+        {
+            bool WasStable = false;
+            string CurrentCircuitManoeuvre = "Start";
+            while(CircuitControl)
+            {
+                Control1[] Controls = GetControlBuffer();
+
+                bool Stable = IsCommInputStable(Controls);
+                // if stable and was not stable, manoeuvre finished
+                if (Stable && !WasStable)
+                {
+                    if (simconnect != null) StopManoeuvre();
+
+                    CurrentCircuitManoeuvre = NextCircuitManoeuvre(CurrentCircuitManoeuvre);
+                    Console.WriteLine("New Manoeuvre: " + CurrentCircuitManoeuvre);
+
+                    if (CurrentCircuitManoeuvre == "End")
+                    {
+                        CircuitControl = false;
+                        break;
+                    }
+
+
+                    if (Utils.IsStraightFlight(CurrentCircuitManoeuvre))
+                    {
+                        StraightFlight(Controls.Last());
+                        Thread.Sleep(5000);
+                        continue;
+                    }
+                    else
+                    {
+                        MANOEUVRE = CurrentCircuitManoeuvre;
+                        StartManoeuvre();
+                    }
+                } 
+                WasStable = Stable;
+
+                Thread.Sleep(500); // TODO choose better pause value?
+            }
+            Console.WriteLine("End of circuit");
+        }
+        #endregion
+
+        #region GoToPoint
+
+        public void GoToPoint(double latitude, double longitude, double altitude)
+        {
+            SIMCONNECT_DATA_WAYPOINT waypoint = new SIMCONNECT_DATA_WAYPOINT()
+            {
+                Altitude = altitude, 
+                Latitude = latitude,
+                Longitude = longitude,
+                Flags = (uint)SIMCONNECT_WAYPOINT_FLAGS.NONE,
+            };
+            
+            simconnect.SetDataOnSimObject(DEFINITIONS.SIMCONNECT_DATA_WAYPOINT, SimConnect.SIMCONNECT_OBJECT_ID_USER, 0, waypoint);
+        }
+        #endregion
+
+
+        #region AIControlLoop
 
         CommInput? BuildCommInput()
         {
@@ -394,6 +531,32 @@ namespace FSXLSTM
             }
         }
 
+        #endregion
+
+        private void StartManoeuvre()
+        {
+            if (simconnect == null)
+            {
+                connect();
+            }
+            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Control1, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SIM_FRAME, 0, 0, 0, 0);
+
+            AIControl = true;
+            ControlThread = new Thread(() => { GetControls(); });
+            ControlThread.Start();
+        }
+
+        private void StopManoeuvre()
+        {
+            AIControl = false;
+            if (ControlThread != null) ControlThread.Join();
+            ControlThread = null;
+
+            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Control1, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.NEVER, 0, 0, 0, 0);
+            //simconnect.Dispose();
+            //simconnect = null;
+        }
+
         #region BUTTONS
         private void buttonStart(object sender, EventArgs e)
         {
@@ -434,35 +597,44 @@ namespace FSXLSTM
                     if (dialogResultHeading == DialogResult.Yes)
                     {
                         var input = formHeading.Controls.OfType<TextBox>().Where(i => i.Tag.ToString() == "TARGET_ALTITUDE");
-                        TARGET_HEADING = Degrees2Radians(double.Parse(input.ToList()[0].Text));
+                        TARGET_HEADING = Utils.Degrees2Radians(double.Parse(input.ToList()[0].Text));
                     }
                     break;
                 default:
                     break;
             }
 
-            if (simconnect == null)
-            {
-                connect();
-            }
-            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Control1, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SIM_FRAME, 0, 0, 0, 0);
-
-            AIControl = true;
-            ControlThread = new Thread(() => { GetControls(); });
-            ControlThread.Start();
+            StartManoeuvre();
         }
 
         private void buttonStop_Click(object sender, EventArgs e)
         {
-            AIControl = false;
-            ControlThread.Join();
-            ControlThread = null;
-
-            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Control1, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.NEVER, 0, 0, 0, 0);
-            simconnect.Dispose();
-            simconnect = null;
+            StopManoeuvre();
         }
         
+        private void manoeuvreCircuit_Click(object sender, EventArgs e)
+        {
+            if (simconnect == null)
+            {
+                connect();
+            }
+
+            CircuitControl = true;
+            CircuitControlThread = new Thread(() => { CircuitControlLoop(); });
+            CircuitControlThread.Start();
+
+        }
+        
+        private void stopManoeuvreCircuit_Click(object sender, EventArgs e)
+        {
+            StopManoeuvre();
+
+            CircuitControl = false;
+            CircuitControlThread.Join();
+            CircuitControlThread = null;
+        }
+        
+        #endregion
         
         protected override void DefWndProc(ref Message m)
         {
@@ -484,10 +656,6 @@ namespace FSXLSTM
             
         }
 
-        private double Degrees2Radians(double degree)
-        {
-            return (degree * Math.PI / 180);
-        }
-        #endregion
+        
     }
 }

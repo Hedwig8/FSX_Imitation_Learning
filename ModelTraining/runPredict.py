@@ -8,17 +8,17 @@ from dataConsidered import manoeuvre_data
 from dataset2input import manoeuvre_window_size
 
 def pandas2numpy(X_list, manoeuvre):
-    if manoeuvre == 'Climb' or manoeuvre == 'SteepCurve':
+    if manoeuvre == 'Climb':
         return np.array(X_list[0])
     return np.array([X_list[0]])
 
 #models
 manoeuvres_controls = {
-    #'Immelmann': ['elevator', 'aileron'],
+    'Immelmann': ['elevator', 'aileron'],
     'SteepCurve': ['elevator', 'aileron', 'rudder'],
-    #'Split-S': ['elevator', 'aileron'],
-    #'HalfCubanEight': ['elevator', 'aileron'],
-    'Climb': ['elevator'],
+    'Split-S': ['elevator', 'aileron'],
+    'HalfCubanEight': ['elevator', 'aileron'],
+    #'Climb': ['elevator'],
     #'Approach': ['elevator', 'throttle'],
     #'AltitudeChanger': ['elevator'],
     
