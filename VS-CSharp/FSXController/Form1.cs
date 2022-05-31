@@ -292,6 +292,7 @@ namespace FSXLSTM
                 simconnect.RegisterDataDefineStruct<AileronSurface>(DEFINITIONS.AileronSurface);
                 simconnect.RegisterDataDefineStruct<RudderSurface>(DEFINITIONS.RudderSurface);
                 simconnect.RegisterDataDefineStruct<ThrottleSurface>(DEFINITIONS.ThrottleSurface);
+                simconnect.RegisterDataDefineStruct<SIMCONNECT_DATA_WAYPOINT>(DEFINITIONS.SIMCONNECT_DATA_WAYPOINT);
 
                 // catch a simobject data request
                 simconnect.OnRecvSimobjectData += new SimConnect.RecvSimobjectDataEventHandler(simconnect_OnRecvSimobjectData);
