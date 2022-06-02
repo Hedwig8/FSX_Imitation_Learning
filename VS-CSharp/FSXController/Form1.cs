@@ -68,12 +68,13 @@ namespace FSXLSTM
             ThrottleSurface,
             ElevatorSurface,
 
-            SIMCONNECT_DATA_WAYPOINT
+            AircraftWaypoints,
         }
 
         enum DATA_REQUESTS
         {
             REQUEST_1,
+            REQUEST_AIRCRAFT
         };
 
 
@@ -209,10 +210,21 @@ namespace FSXLSTM
 
         private RequestSocket client = null;
         SimConnect simconnect = null;
+        int AircraftID = 0;
 
         public Form1()
         {
             InitializeComponent();
+
+            connect();
+
+
+            CreateAirplane();
+            // create airplane according to github 
+                // receive airplane id information
+
+            // anything more??
+
         }
 
         void connect()
@@ -284,6 +296,10 @@ namespace FSXLSTM
                 simconnect.AddToDataDefinition(DEFINITIONS.RudderSurface, "RUDDER POSITION", "", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
 
                 simconnect.AddToDataDefinition(DEFINITIONS.ThrottleSurface, "General Eng Throttle Lever Position:1", "", SIMCONNECT_DATATYPE.FLOAT64, 0, SimConnect.SIMCONNECT_UNUSED);
+
+                // Waypoints
+                simconnect.AddToDataDefinition(DEFINITIONS.AircraftWaypoints, "AI WAYPOINT LIST", "number", SIMCONNECT_DATATYPE.WAYPOINT, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+
                 
                 // IMPORTANT: register it with the simconnect managed wrapper marshaller
                 // if you skip this step, you will only receive a uint in the .dwData field.
@@ -292,10 +308,11 @@ namespace FSXLSTM
                 simconnect.RegisterDataDefineStruct<AileronSurface>(DEFINITIONS.AileronSurface);
                 simconnect.RegisterDataDefineStruct<RudderSurface>(DEFINITIONS.RudderSurface);
                 simconnect.RegisterDataDefineStruct<ThrottleSurface>(DEFINITIONS.ThrottleSurface);
-                simconnect.RegisterDataDefineStruct<SIMCONNECT_DATA_WAYPOINT>(DEFINITIONS.SIMCONNECT_DATA_WAYPOINT);
-
+                simconnect.RegisterDataDefineStruct<>
+                
                 // catch a simobject data request
                 simconnect.OnRecvSimobjectData += new SimConnect.RecvSimobjectDataEventHandler(simconnect_OnRecvSimobjectData);
+                simconnect.OnRecvAssignedObjectId += new SimConnect.RecvAssignedObjectIdEventHandler(simconnect_OnRecvAssignedObjectId);
             }
             catch (COMException ex)
             {
@@ -303,7 +320,38 @@ namespace FSXLSTM
             }
         }
 
-            
+        void CreateAirplane()
+        {
+            SIMCONNECT_DATA_INITPOSITION posData;
+            posData.Altitude = 500;
+            posData.Latitude = -8.68043345;
+            posData.Longitude = 41.2454213;
+            posData.OnGround = 0;
+            posData.Airspeed = 160;
+            posData.Pitch = -0.1;
+            posData.Bank = 0;
+            posData.Heading = 0;
+
+            simconnect.AICreateNonATCAircraft("Extra 300S", "", posData, DATA_REQUESTS.REQUEST_AIRCRAFT);
+        }    
+
+        void simconnect_OnRecvAssignedObjectId(SimConnect sender, SIMCONNECT_RECV_ASSIGNED_OBJECT_ID data)
+        {
+            Console.WriteLine("receive aircraft id");
+            try
+            {
+                if ((DATA_REQUESTS)data.dwRequestID == DATA_REQUESTS.REQUEST_AIRCRAFT)
+                {
+                    AircraftID =(int)(DATA_REQUESTS)data.dwObjectID;
+                    Console.WriteLine(AircraftID);
+                }
+            } 
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
         public List<T> getsublist<T>(List<T> data, int window)
         {
             return data.GetRange(data.Count - window, window);
@@ -455,7 +503,7 @@ namespace FSXLSTM
                 Flags = (uint)SIMCONNECT_WAYPOINT_FLAGS.NONE,
             };
             
-            simconnect.SetDataOnSimObject(DEFINITIONS.SIMCONNECT_DATA_WAYPOINT, SimConnect.SIMCONNECT_OBJECT_ID_USER, 0, waypoint);
+            simconnect.SetDataOnSimObject(DEFINITIONS.AircraftWaypoints, SimConnect.SIMCONNECT_OBJECT_ID_USER, 0, new Object[] { waypoint });
         }
         #endregion
 
@@ -536,10 +584,6 @@ namespace FSXLSTM
 
         private void StartManoeuvre()
         {
-            if (simconnect == null)
-            {
-                connect();
-            }
             simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Control1, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SIM_FRAME, 0, 0, 0, 0);
 
             AIControl = true;
@@ -615,11 +659,6 @@ namespace FSXLSTM
         
         private void manoeuvreCircuit_Click(object sender, EventArgs e)
         {
-            if (simconnect == null)
-            {
-                connect();
-            }
-
             CircuitControl = true;
             CircuitControlThread = new Thread(() => { CircuitControlLoop(); });
             CircuitControlThread.Start();

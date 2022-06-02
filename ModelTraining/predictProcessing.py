@@ -33,7 +33,7 @@ def curve_features(df, final_heading):
     heading_diff = []
     for heading in df['heading']:
         diff = final_heading - heading
-        heading_diff.append(diff + PI*2 if diff < -PI else diff - PI*2 if diff > PI else diff)
+        heading_diff.append((diff + PI) % (2*PI) - PI)
     df['heading_diff'] = heading_diff
     return df[1:]
 

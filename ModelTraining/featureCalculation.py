@@ -67,7 +67,7 @@ def curve_features(ex_list):
         heading_diff = []
         for i in reversed(df.index):
             diff = last_heading - df['heading'][i]
-            accumulated_heading_diff += diff + PI*2 if diff < -PI else diff - PI*2 if diff > PI else diff
+            accumulated_heading_diff += (diff + PI) % (2*PI) - PI 
             heading_diff.append(accumulated_heading_diff)
             last_heading = df['heading'][i]
         heading_diff.reverse()
