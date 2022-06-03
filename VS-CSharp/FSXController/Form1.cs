@@ -74,7 +74,8 @@ namespace FSXLSTM
         enum DATA_REQUESTS
         {
             REQUEST_1,
-            REQUEST_AIRCRAFT
+            REQUEST_AIRCRAFT,
+            REQUEST_AI_RELEASE
         };
 
 
@@ -308,7 +309,6 @@ namespace FSXLSTM
                 simconnect.RegisterDataDefineStruct<AileronSurface>(DEFINITIONS.AileronSurface);
                 simconnect.RegisterDataDefineStruct<RudderSurface>(DEFINITIONS.RudderSurface);
                 simconnect.RegisterDataDefineStruct<ThrottleSurface>(DEFINITIONS.ThrottleSurface);
-                simconnect.RegisterDataDefineStruct<>
                 
                 // catch a simobject data request
                 simconnect.OnRecvSimobjectData += new SimConnect.RecvSimobjectDataEventHandler(simconnect_OnRecvSimobjectData);
@@ -323,9 +323,9 @@ namespace FSXLSTM
         void CreateAirplane()
         {
             SIMCONNECT_DATA_INITPOSITION posData;
-            posData.Altitude = 500;
-            posData.Latitude = -8.68043345;
-            posData.Longitude = 41.2454213;
+            posData.Altitude = 2000;
+            posData.Latitude = 41.2334213;
+            posData.Longitude = -8.67733345;
             posData.OnGround = 0;
             posData.Airspeed = 160;
             posData.Pitch = -0.1;
@@ -344,6 +344,7 @@ namespace FSXLSTM
                 {
                     AircraftID =(int)(DATA_REQUESTS)data.dwObjectID;
                     Console.WriteLine(AircraftID);
+                    ReleaseControl();
                 }
             } 
             catch(Exception e)
@@ -427,6 +428,9 @@ namespace FSXLSTM
                 case "StraightFlight2":
                     return "Split-S";
                 case "Split-S":
+                    return "StraightFlight3";
+
+                case "StraightFlight3":
 
                 default:
                     return "End";
@@ -445,6 +449,11 @@ namespace FSXLSTM
             Console.WriteLine("End Position: " + DestinationPoint[0] + ", " + DestinationPoint[1]);
             
             GoToPoint(DestinationPoint[0], DestinationPoint[1], position.altitude);
+        }
+
+        void ReleaseControl()
+        {
+            simconnect.AIReleaseControl((uint)AircraftID, DATA_REQUESTS.REQUEST_AI_RELEASE);
         }
 
         void CircuitControlLoop()
@@ -473,8 +482,10 @@ namespace FSXLSTM
 
                     if (Utils.IsStraightFlight(CurrentCircuitManoeuvre))
                     {
-                        StraightFlight(Controls.Last());
-                        Thread.Sleep(5000);
+                        if (Controls.Count() == 0) GoToPoint(50, 20, 5000);
+                        else StraightFlight(Controls.Last());
+                        
+                        Thread.Sleep(10000);
                         continue;
                     }
                     else
@@ -500,10 +511,11 @@ namespace FSXLSTM
                 Altitude = altitude, 
                 Latitude = latitude,
                 Longitude = longitude,
-                Flags = (uint)SIMCONNECT_WAYPOINT_FLAGS.NONE,
+                percentThrottle = 100,
+                Flags = (uint)SIMCONNECT_WAYPOINT_FLAGS.THROTTLE_REQUESTED,
             };
             
-            simconnect.SetDataOnSimObject(DEFINITIONS.AircraftWaypoints, SimConnect.SIMCONNECT_OBJECT_ID_USER, 0, new Object[] { waypoint });
+            simconnect.SetDataOnSimObject(DEFINITIONS.AircraftWaypoints, (uint)AircraftID, 0, new Object[] { waypoint });
         }
         #endregion
 
@@ -561,22 +573,22 @@ namespace FSXLSTM
             if (controls.elevator < 10)
             {
                 var elevator = new ElevatorSurface() { elevator = controls.elevator };
-                simconnect.SetDataOnSimObject(DEFINITIONS.ElevatorSurface, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, elevator);
+                simconnect.SetDataOnSimObject(DEFINITIONS.ElevatorSurface, (uint)AircraftID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, elevator);
             }
             if (controls.aileron < 10)
             {
                 var aileron = new AileronSurface() { aileron = controls.aileron };
-                simconnect.SetDataOnSimObject(DEFINITIONS.AileronSurface, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, aileron);
+                simconnect.SetDataOnSimObject(DEFINITIONS.AileronSurface, (uint)AircraftID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, aileron);
             }
             if (controls.rudder < 10)
             {
                 var rudder = new RudderSurface() { rudder = controls.rudder };
-                simconnect.SetDataOnSimObject(DEFINITIONS.RudderSurface, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, rudder);
+                simconnect.SetDataOnSimObject(DEFINITIONS.RudderSurface, (uint)AircraftID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, rudder);
             }
             if (controls.throttle < 10)
             {
                 var throttle = new ThrottleSurface() { throttle = controls.throttle };
-                simconnect.SetDataOnSimObject(DEFINITIONS.ThrottleSurface, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, throttle);
+                simconnect.SetDataOnSimObject(DEFINITIONS.ThrottleSurface, (uint)AircraftID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, throttle);
             }
         }
 
@@ -584,7 +596,7 @@ namespace FSXLSTM
 
         private void StartManoeuvre()
         {
-            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Control1, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SIM_FRAME, 0, 0, 0, 0);
+            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Control1, (uint)AircraftID, SIMCONNECT_PERIOD.SIM_FRAME, 0, 0, 0, 0);
 
             AIControl = true;
             ControlThread = new Thread(() => { GetControls(); });
@@ -597,7 +609,7 @@ namespace FSXLSTM
             if (ControlThread != null) ControlThread.Join();
             ControlThread = null;
 
-            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Control1, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.NEVER, 0, 0, 0, 0);
+            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Control1, (uint)AircraftID, SIMCONNECT_PERIOD.NEVER, 0, 0, 0, 0);
             //simconnect.Dispose();
             //simconnect = null;
         }
