@@ -51,7 +51,12 @@ namespace FSXLSTM
         List<Control1> controlBuffer = new List<Control1>();
         bool CircuitControl = false;
         Thread CircuitControlThread = null;
-        
+
+        double InitialLatitude = 41.2334213;
+        double InitialLongitude = -8.67733345;
+        double InitialHeading = 0;
+        double InitialAltitude = 2000;
+
         #endregion
 
         #region PROGRAM_VARS
@@ -219,14 +224,10 @@ namespace FSXLSTM
 
             connect();
 
-
             CreateAirplane();
-            // create airplane according to github 
-                // receive airplane id information
-
-            // anything more??
-
         }
+
+        #region SimConnectFSX
 
         void connect()
         { 
@@ -319,45 +320,6 @@ namespace FSXLSTM
                 Console.WriteLine(ex);
             }
         }
-
-        void CreateAirplane()
-        {
-            SIMCONNECT_DATA_INITPOSITION posData;
-            posData.Altitude = 2000;
-            posData.Latitude = 41.2334213;
-            posData.Longitude = -8.67733345;
-            posData.OnGround = 0;
-            posData.Airspeed = 160;
-            posData.Pitch = -0.1;
-            posData.Bank = 0;
-            posData.Heading = 0;
-
-            simconnect.AICreateNonATCAircraft("Extra 300S", "", posData, DATA_REQUESTS.REQUEST_AIRCRAFT);
-        }    
-
-        void simconnect_OnRecvAssignedObjectId(SimConnect sender, SIMCONNECT_RECV_ASSIGNED_OBJECT_ID data)
-        {
-            Console.WriteLine("receive aircraft id");
-            try
-            {
-                if ((DATA_REQUESTS)data.dwRequestID == DATA_REQUESTS.REQUEST_AIRCRAFT)
-                {
-                    AircraftID =(int)(DATA_REQUESTS)data.dwObjectID;
-                    Console.WriteLine(AircraftID);
-                    ReleaseControl();
-                }
-            } 
-            catch(Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-        }
-
-        public List<T> getsublist<T>(List<T> data, int window)
-        {
-            return data.GetRange(data.Count - window, window);
-        }
-        
         void simconnect_OnRecvSimobjectData(SimConnect sender, SIMCONNECT_RECV_SIMOBJECT_DATA data)
         {
             switch ((DATA_REQUESTS) data.dwRequestID)
@@ -388,6 +350,54 @@ namespace FSXLSTM
             }
         }
 
+        #endregion
+
+        #region AIAircraftCreation
+
+        void CreateAirplane()
+        {
+            SIMCONNECT_DATA_INITPOSITION posData;
+            posData.Altitude = InitialAltitude;
+            posData.Latitude = InitialLatitude;
+            posData.Longitude = InitialLongitude;
+            posData.OnGround = 0;
+            posData.Airspeed = 160;
+            posData.Pitch = -0.3;
+            posData.Bank = 0;
+            posData.Heading = InitialHeading;
+
+            simconnect.AICreateNonATCAircraft("Extra 300S", "", posData, DATA_REQUESTS.REQUEST_AIRCRAFT);
+        }    
+
+        void AircraftFirstWaypoint()
+        {
+            var GoalPoint = Utils.calculateDestinationPosition(InitialLatitude, InitialLongitude, InitialAltitude * 0.3048, InitialHeading, 1000);
+            Console.WriteLine($"{InitialLatitude}, {InitialLongitude} -> {GoalPoint[0]}, {GoalPoint[1]}");
+            GoToPoint(GoalPoint[0], GoalPoint[1], InitialAltitude);
+            Thread.Sleep(3000);
+            ReleaseControl();
+        }
+
+        void simconnect_OnRecvAssignedObjectId(SimConnect sender, SIMCONNECT_RECV_ASSIGNED_OBJECT_ID data)
+        {
+            Console.WriteLine("receive aircraft id");
+            try
+            {
+                if ((DATA_REQUESTS)data.dwRequestID == DATA_REQUESTS.REQUEST_AIRCRAFT)
+                {
+                    AircraftID =(int)(DATA_REQUESTS)data.dwObjectID;
+                    Console.WriteLine("Aircraft created with id " + AircraftID);
+                    AircraftFirstWaypoint();
+                }
+            } 
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
+        #endregion
+        
         #region CircuitControl
 
         Control1[] GetControlBuffer()
@@ -396,6 +406,7 @@ namespace FSXLSTM
 
             var lastControls = controlBuffer.ToArray();
             controlBuffer.Clear();
+            controlBuffer.Add(lastControls.Last());
             return lastControls;
         }
         
@@ -482,10 +493,9 @@ namespace FSXLSTM
 
                     if (Utils.IsStraightFlight(CurrentCircuitManoeuvre))
                     {
-                        if (Controls.Count() == 0) GoToPoint(50, 20, 5000);
-                        else StraightFlight(Controls.Last());
-                        
+                        StraightFlight(Controls.Last());
                         Thread.Sleep(10000);
+                        ReleaseControl();
                         continue;
                     }
                     else
@@ -496,7 +506,7 @@ namespace FSXLSTM
                 } 
                 WasStable = Stable;
 
-                Thread.Sleep(500); // TODO choose better pause value?
+                Thread.Sleep(400); // TODO choose better pause value?
             }
             Console.WriteLine("End of circuit");
         }
@@ -509,8 +519,8 @@ namespace FSXLSTM
             SIMCONNECT_DATA_WAYPOINT waypoint = new SIMCONNECT_DATA_WAYPOINT()
             {
                 Altitude = altitude, 
-                Latitude = latitude,
-                Longitude = longitude,
+                Latitude = Utils.Radians2Degrees(latitude),
+                Longitude = Utils.Radians2Degrees(longitude),
                 percentThrottle = 100,
                 Flags = (uint)SIMCONNECT_WAYPOINT_FLAGS.THROTTLE_REQUESTED,
             };
@@ -520,7 +530,7 @@ namespace FSXLSTM
         #endregion
 
 
-        #region AIControlLoop
+        #region ManoeuvreControlLoop
 
         CommInput? BuildCommInput()
         {
@@ -594,6 +604,8 @@ namespace FSXLSTM
 
         #endregion
 
+        #region ManoeuvreControl
+
         private void StartManoeuvre()
         {
             simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Control1, (uint)AircraftID, SIMCONNECT_PERIOD.SIM_FRAME, 0, 0, 0, 0);
@@ -613,6 +625,8 @@ namespace FSXLSTM
             //simconnect.Dispose();
             //simconnect = null;
         }
+
+        #endregion
 
         #region BUTTONS
         private void buttonStart(object sender, EventArgs e)
@@ -682,12 +696,14 @@ namespace FSXLSTM
             StopManoeuvre();
 
             CircuitControl = false;
-            CircuitControlThread.Join();
+            if (CircuitControlThread != null) CircuitControlThread.Join();
             CircuitControlThread = null;
         }
-        
+
         #endregion
-        
+
+        #region Extras
+
         protected override void DefWndProc(ref Message m)
         {
             if (m.Msg == WM_USER_SIMCONNECT)
@@ -703,11 +719,6 @@ namespace FSXLSTM
             }
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            
-        }
-
-        
+        #endregion
     }
 }

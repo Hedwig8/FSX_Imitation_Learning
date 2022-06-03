@@ -18,6 +18,11 @@ namespace FSXLSTM
             return (degree * Math.PI / 180);
         }
 
+        public static double Radians2Degrees(double radians)
+        {
+            return radians * 180 / Math.PI;
+        }
+
         public static bool IsStraightFlight(string manoeuvre)
         {
             return manoeuvre.IndexOf("StraightFlight") != -1;
