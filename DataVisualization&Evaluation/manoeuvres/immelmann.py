@@ -59,6 +59,6 @@ def immelmann_eval(df):
     return eval, {
                     'heading_initial_final': eval_heading_initial_final, 
                     'heading_diff': eval_heading_diff, 
-                    'semi_loop':eval_semi_loop, 
-                    'eval_semi_roll': eval_semi_roll
+                    'semi_loop': eval_semi_loop, 
+                    'semi_roll': eval_semi_roll
                 }

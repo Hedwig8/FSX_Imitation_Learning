@@ -9,7 +9,7 @@ from evaluation import manoeuvre_evaluation
 dataset_path = "../ProcessedDataset"
 id = "*"
 manoeuvre_quality = "Good"
-manoeuvre_name = "Immelmann"
+manoeuvre_name = "Split-S"
 
 examples_evals_list = []
 evals_list = []
@@ -18,7 +18,6 @@ for filename in glob.glob(f'{dataset_path}/{id}/{manoeuvre_quality}/{manoeuvre_n
     df = velocity_to_position(pd.read_csv(filename))
     df = rotate_initial_heading(df)
     eval, components = manoeuvre_evaluation[manoeuvre_name](df)
-    if eval < 60: continue
     examples_evals_list.append((df, eval))
     evals_list.append(eval)
     components_list.append(components)
