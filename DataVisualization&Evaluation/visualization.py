@@ -9,7 +9,7 @@ from evaluation import manoeuvre_evaluation
 dataset_path = "../ProcessedDataset"
 id = "*"
 manoeuvre_quality = "Good"
-manoeuvre_name = "Split-S"
+manoeuvre_name = "HalfCubanEight"
 
 examples_evals_list = []
 evals_list = []
