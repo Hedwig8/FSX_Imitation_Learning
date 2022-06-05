@@ -21,6 +21,8 @@ namespace AircraftDataCollector
         // User-defined win32 event
         const int WM_USER_SIMCONNECT = 0x0402;
 
+        uint AircraftID = SimConnect.SIMCONNECT_OBJECT_ID_USER;
+
         #endregion
         
         
@@ -250,8 +252,23 @@ namespace AircraftDataCollector
         #region Buttons
         private void buttonStart_Click(object sender, EventArgs e)
         {
-            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Struct1, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SIM_FRAME, 0, 0, 0, 0);
-            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_2, DEFINITIONS.Struct2, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SECOND, 0, 0, 0, 0);
+            try
+            {
+                var input = this.Controls.OfType<TextBox>();//.Where(i => i.Tag.ToString() == "AircraftID_input");
+                Console.WriteLine(input);
+                AircraftID = uint.Parse(input.ToList()[0].Text);
+                Console.WriteLine($"Input read: {AircraftID}");
+            }
+            catch(Exception ex)
+            {
+                AircraftID = SimConnect.SIMCONNECT_OBJECT_ID_USER;
+                Console.WriteLine($"No Input; ID is default {AircraftID}");
+            }
+
+
+
+            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Struct1, AircraftID, SIMCONNECT_PERIOD.SIM_FRAME, 0, 0, 0, 0);
+            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_2, DEFINITIONS.Struct2, AircraftID, SIMCONNECT_PERIOD.SECOND, 0, 0, 0, 0);
 
             setButtons(false, true);
             
@@ -259,8 +276,8 @@ namespace AircraftDataCollector
 
         private void buttonStop_Click(object sender, EventArgs e)
         {
-            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Struct1, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.NEVER, 0, 0, 0, 0);
-            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_2, DEFINITIONS.Struct2, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.NEVER, 0, 0, 0, 0);
+            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Struct1, AircraftID, SIMCONNECT_PERIOD.NEVER, 0, 0, 0, 0);
+            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_2, DEFINITIONS.Struct2, AircraftID, SIMCONNECT_PERIOD.NEVER, 0, 0, 0, 0);
 
             if (log.Count > 0 || log2.Count > 0)
             {
@@ -674,8 +691,8 @@ namespace AircraftDataCollector
             output = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
         }
 
+
         #endregion
-        
     }
 }
 // End of sample

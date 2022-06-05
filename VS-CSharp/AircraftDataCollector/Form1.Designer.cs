@@ -36,6 +36,8 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.lblStatus = new System.Windows.Forms.Label();
             this.btnExit = new System.Windows.Forms.Button();
+            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // richResponse
@@ -96,18 +98,37 @@
             this.btnExit.UseVisualStyleBackColor = true;
             this.btnExit.Click += new System.EventHandler(this.btnExit_Click);
             // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(183, 71);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(86, 22);
+            this.textBox2.TabIndex = 9;
+            this.textBox2.Tag = "AircraftID_input";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(12, 74);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(140, 16);
+            this.label1.TabIndex = 10;
+            this.label1.Text = "Aircraft ID (if AI Aircraft)";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(419, 691);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.textBox2);
             this.Controls.Add(this.btnExit);
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.buttonStop);
             this.Controls.Add(this.buttonStart);
             this.Controls.Add(this.richResponse);
-            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "Form1";
             this.Text = "Aircraft Data Collector";
@@ -115,6 +136,7 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
 
         private System.Windows.Forms.Button btnExit;
@@ -131,6 +153,8 @@
         #endregion
 
         private System.Windows.Forms.RichTextBox richResponse;
+        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.Label label1;
     }
 }
 
