@@ -40,6 +40,10 @@
             this.radioButton7 = new System.Windows.Forms.RadioButton();
             this.manoeuvreCircuit = new System.Windows.Forms.Button();
             this.stopManoeuvreCircuit = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // start
@@ -150,7 +154,7 @@
             // 
             // manoeuvreCircuit
             // 
-            this.manoeuvreCircuit.Location = new System.Drawing.Point(10, 307);
+            this.manoeuvreCircuit.Location = new System.Drawing.Point(9, 498);
             this.manoeuvreCircuit.Name = "manoeuvreCircuit";
             this.manoeuvreCircuit.Size = new System.Drawing.Size(320, 34);
             this.manoeuvreCircuit.TabIndex = 16;
@@ -160,7 +164,7 @@
             // 
             // stopManoeuvreCircuit
             // 
-            this.stopManoeuvreCircuit.Location = new System.Drawing.Point(10, 347);
+            this.stopManoeuvreCircuit.Location = new System.Drawing.Point(9, 538);
             this.stopManoeuvreCircuit.Name = "stopManoeuvreCircuit";
             this.stopManoeuvreCircuit.Size = new System.Drawing.Size(320, 34);
             this.stopManoeuvreCircuit.TabIndex = 17;
@@ -168,11 +172,52 @@
             this.stopManoeuvreCircuit.UseVisualStyleBackColor = true;
             this.stopManoeuvreCircuit.Click += new System.EventHandler(this.stopManoeuvreCircuit_Click);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(9, 312);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(320, 34);
+            this.button1.TabIndex = 18;
+            this.button1.Text = "Create AI Airplane";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(9, 352);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(320, 34);
+            this.button2.TabIndex = 19;
+            this.button2.Text = "Destroy AI Airplane";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(151, 408);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(92, 22);
+            this.textBox1.TabIndex = 20;
+            this.textBox1.Tag = "AircraftID";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(81, 411);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(64, 16);
+            this.label1.TabIndex = 21;
+            this.label1.Text = "Aircraft ID";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(343, 393);
+            this.ClientSize = new System.Drawing.Size(343, 584);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.button2);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.stopManoeuvreCircuit);
             this.Controls.Add(this.manoeuvreCircuit);
             this.Controls.Add(this.radioButton7);
@@ -206,5 +251,9 @@
         private System.Windows.Forms.RadioButton radioButton7;
         private System.Windows.Forms.Button manoeuvreCircuit;
         private System.Windows.Forms.Button stopManoeuvreCircuit;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Label label1;
     }
 }

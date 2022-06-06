@@ -254,9 +254,9 @@ namespace AircraftDataCollector
         {
             try
             {
-                var input = this.Controls.OfType<TextBox>();//.Where(i => i.Tag.ToString() == "AircraftID_input");
+                var input = textBox2.Text;//.Where(i => i.Tag.ToString() == "AircraftID_input");
                 Console.WriteLine(input);
-                AircraftID = uint.Parse(input.ToList()[0].Text);
+                AircraftID = uint.Parse(input);
                 Console.WriteLine($"Input read: {AircraftID}");
             }
             catch(Exception ex)

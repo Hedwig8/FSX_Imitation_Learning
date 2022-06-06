@@ -80,7 +80,8 @@ namespace FSXLSTM
         {
             REQUEST_1,
             REQUEST_AIRCRAFT,
-            REQUEST_AI_RELEASE
+            REQUEST_AI_RELEASE,
+            REQUEST_REMOVE_OBJ
         };
 
 
@@ -216,7 +217,7 @@ namespace FSXLSTM
 
         private RequestSocket client = null;
         SimConnect simconnect = null;
-        int AircraftID = 0;
+        uint AircraftID = 0;
 
         public Form1()
         {
@@ -224,7 +225,7 @@ namespace FSXLSTM
 
             connect();
 
-            CreateAirplane();
+            //CreateAirplane();
         }
 
         #region SimConnectFSX
@@ -320,6 +321,7 @@ namespace FSXLSTM
                 Console.WriteLine(ex);
             }
         }
+        
         void simconnect_OnRecvSimobjectData(SimConnect sender, SIMCONNECT_RECV_SIMOBJECT_DATA data)
         {
             switch ((DATA_REQUESTS) data.dwRequestID)
@@ -335,8 +337,8 @@ namespace FSXLSTM
                     if (AIControl) dataBuffer.Add(s1);
                     if (CircuitControl) controlBuffer.Add(s1);
 
-                    if (MANOEUVRE == "Immelmann")
-                        Console.WriteLine(Utils.IsStable(s1.pitch, s1.bank));
+                    //if (MANOEUVRE == "Immelmann")
+                      //  Console.WriteLine(Utils.IsStable(s1.pitch, s1.bank));
 
                     if (MANOEUVRE == "SteepCurve" && INITIAL_HEADING == 0)
                     {
@@ -347,6 +349,25 @@ namespace FSXLSTM
 
                 default:
                     break;
+            }
+        }
+
+        void simconnect_OnRecvAssignedObjectId(SimConnect sender, SIMCONNECT_RECV_ASSIGNED_OBJECT_ID data)
+        {
+            Console.WriteLine("receive aircraft id");
+            try
+            {
+                if ((DATA_REQUESTS)data.dwRequestID == DATA_REQUESTS.REQUEST_AIRCRAFT)
+                {
+                    AircraftID =(uint)(DATA_REQUESTS)data.dwObjectID;
+                    Console.WriteLine("Aircraft created with id " + AircraftID);
+                    AircraftFirstWaypoint();
+                    textBox1.Text = AircraftID.ToString();
+                }
+            } 
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
             }
         }
 
@@ -361,12 +382,12 @@ namespace FSXLSTM
             posData.Latitude = InitialLatitude;
             posData.Longitude = InitialLongitude;
             posData.OnGround = 0;
-            posData.Airspeed = 160;
+            posData.Airspeed = 180;
             posData.Pitch = -0.3;
             posData.Bank = 0;
             posData.Heading = InitialHeading;
 
-            simconnect.AICreateNonATCAircraft("Extra 300S", "", posData, DATA_REQUESTS.REQUEST_AIRCRAFT);
+            simconnect.AICreateNonATCAircraft("Extra 300S Paint2", "", posData, DATA_REQUESTS.REQUEST_AIRCRAFT);
         }    
 
         void AircraftFirstWaypoint()
@@ -374,27 +395,10 @@ namespace FSXLSTM
             var GoalPoint = Utils.calculateDestinationPosition(InitialLatitude, InitialLongitude, InitialAltitude * 0.3048, InitialHeading, 1000);
             Console.WriteLine($"{InitialLatitude}, {InitialLongitude} -> {GoalPoint[0]}, {GoalPoint[1]}");
             GoToPoint(GoalPoint[0], GoalPoint[1], InitialAltitude);
-            Thread.Sleep(3000);
+            Thread.Sleep(10000);
             ReleaseControl();
         }
 
-        void simconnect_OnRecvAssignedObjectId(SimConnect sender, SIMCONNECT_RECV_ASSIGNED_OBJECT_ID data)
-        {
-            Console.WriteLine("receive aircraft id");
-            try
-            {
-                if ((DATA_REQUESTS)data.dwRequestID == DATA_REQUESTS.REQUEST_AIRCRAFT)
-                {
-                    AircraftID =(int)(DATA_REQUESTS)data.dwObjectID;
-                    Console.WriteLine("Aircraft created with id " + AircraftID);
-                    AircraftFirstWaypoint();
-                }
-            } 
-            catch(Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-        }
 
         #endregion
         
@@ -464,7 +468,7 @@ namespace FSXLSTM
 
         void ReleaseControl()
         {
-            simconnect.AIReleaseControl((uint)AircraftID, DATA_REQUESTS.REQUEST_AI_RELEASE);
+            simconnect.AIReleaseControl(AircraftID, DATA_REQUESTS.REQUEST_AI_RELEASE);
         }
 
         void CircuitControlLoop()
@@ -525,10 +529,9 @@ namespace FSXLSTM
                 Flags = (uint)SIMCONNECT_WAYPOINT_FLAGS.THROTTLE_REQUESTED,
             };
             
-            simconnect.SetDataOnSimObject(DEFINITIONS.AircraftWaypoints, (uint)AircraftID, 0, new Object[] { waypoint });
+            simconnect.SetDataOnSimObject(DEFINITIONS.AircraftWaypoints, AircraftID, 0, new Object[] { waypoint });
         }
         #endregion
-
 
         #region ManoeuvreControlLoop
 
@@ -583,22 +586,22 @@ namespace FSXLSTM
             if (controls.elevator < 10)
             {
                 var elevator = new ElevatorSurface() { elevator = controls.elevator };
-                simconnect.SetDataOnSimObject(DEFINITIONS.ElevatorSurface, (uint)AircraftID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, elevator);
+                simconnect.SetDataOnSimObject(DEFINITIONS.ElevatorSurface, AircraftID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, elevator);
             }
             if (controls.aileron < 10)
             {
                 var aileron = new AileronSurface() { aileron = controls.aileron };
-                simconnect.SetDataOnSimObject(DEFINITIONS.AileronSurface, (uint)AircraftID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, aileron);
+                simconnect.SetDataOnSimObject(DEFINITIONS.AileronSurface, AircraftID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, aileron);
             }
             if (controls.rudder < 10)
             {
                 var rudder = new RudderSurface() { rudder = controls.rudder };
-                simconnect.SetDataOnSimObject(DEFINITIONS.RudderSurface, (uint)AircraftID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, rudder);
+                simconnect.SetDataOnSimObject(DEFINITIONS.RudderSurface, AircraftID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, rudder);
             }
             if (controls.throttle < 10)
             {
                 var throttle = new ThrottleSurface() { throttle = controls.throttle };
-                simconnect.SetDataOnSimObject(DEFINITIONS.ThrottleSurface, (uint)AircraftID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, throttle);
+                simconnect.SetDataOnSimObject(DEFINITIONS.ThrottleSurface, AircraftID, SIMCONNECT_DATA_SET_FLAG.DEFAULT, throttle);
             }
         }
 
@@ -608,7 +611,7 @@ namespace FSXLSTM
 
         private void StartManoeuvre()
         {
-            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Control1, (uint)AircraftID, SIMCONNECT_PERIOD.SIM_FRAME, 0, 0, 0, 0);
+            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Control1, AircraftID, SIMCONNECT_PERIOD.SIM_FRAME, 0, 0, 0, 0);
 
             AIControl = true;
             ControlThread = new Thread(() => { GetControls(); });
@@ -621,7 +624,7 @@ namespace FSXLSTM
             if (ControlThread != null) ControlThread.Join();
             ControlThread = null;
 
-            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Control1, (uint)AircraftID, SIMCONNECT_PERIOD.NEVER, 0, 0, 0, 0);
+            simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Control1, AircraftID, SIMCONNECT_PERIOD.NEVER, 0, 0, 0, 0);
             //simconnect.Dispose();
             //simconnect = null;
         }
@@ -639,7 +642,7 @@ namespace FSXLSTM
                 case "Climb":
                 case "Immelmann":
                 case "Split-S":
-                    FormImmelmann formImmelmann = new FormImmelmann();
+                    /*FormImmelmann formImmelmann = new FormImmelmann();
                     DialogResult dialogResult = formImmelmann.ShowDialog();
                     if (dialogResult == DialogResult.Yes)
                     {
@@ -647,10 +650,10 @@ namespace FSXLSTM
                         TARGET_ALTITUDE = double.Parse(input.ToList()[0].Text);
                     }
 
-                    INITIAL_HEADING = 0; // to be initialized later when curve is called
+                    INITIAL_HEADING = 0; // to be initialized later when curve is called*/
                     break;
                 case "HalfCubanEight":
-                    FormHalfCubanEight formHalfCubanEight = new FormHalfCubanEight();
+                    /*FormHalfCubanEight formHalfCubanEight = new FormHalfCubanEight();
                     DialogResult dialogResultHalf = formHalfCubanEight.ShowDialog();
                     if (dialogResultHalf == DialogResult.Yes)
                     {
@@ -660,7 +663,7 @@ namespace FSXLSTM
                         TARGET_MAX_ALTITUDE = double.Parse(input2.ToList()[0].Text);
                     }
 
-                    INITIAL_HEADING = 0; // to be initialized later when curve is called
+                    INITIAL_HEADING = 0; // to be initialized later when curve is called*/
                     break;
                 case "SteepCurve":
                     FormHeading formHeading = new FormHeading();
@@ -698,6 +701,16 @@ namespace FSXLSTM
             CircuitControl = false;
             if (CircuitControlThread != null) CircuitControlThread.Join();
             CircuitControlThread = null;
+        }
+        private void button1_Click(object sender, EventArgs e)
+        {
+            CreateAirplane();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            simconnect.AIRemoveObject(AircraftID, DATA_REQUESTS.REQUEST_REMOVE_OBJ);
+            AircraftID = 0;
         }
 
         #endregion
