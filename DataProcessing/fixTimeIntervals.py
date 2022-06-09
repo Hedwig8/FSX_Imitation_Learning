@@ -1,8 +1,11 @@
 import pandas as pd
 from utils import csvFilePaths, saveDataFrame2CSV
 
-inputDataset = '../AircraftDataCollector/bin/Release/'
-output = '../dataset/'
+#inputDataset = '../AircraftDataCollector/bin/Release/'
+#output = '../dataset/'
+
+inputDataset = '../UnprocessedResults'
+output = '../Results'
 
 files = csvFilePaths(inputDataset)
 

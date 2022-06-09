@@ -1,11 +1,11 @@
 import glob
 
-datasetPath = "../AircraftDataCollector/bin/Release/"
+datasetPath = "../../OriginalCollectedData"
 id = "*"
 manoeuvreQuality = "Good"
 manoeuvreName = "*"
-manoeuvres = ['SteepCurve', 'HalfCubanEight', 'Immelmann', 'Split-S', 'Climb', 'Approach']
-#manoeuvres = ['SteepCurve', 'HalfCubanEight', 'Immelmann', 'Split-S', 'Climb', 'Approach', 'TaxiRun&TakeOff', 'Landing', 'Roll', 'CanopyRoll', 'CubanEight', 'Hammerhead', 'Tailslide']
+#manoeuvres = ['SteepCurve', 'HalfCubanEight', 'Immelmann', 'Split-S', 'Climb', 'Approach']
+manoeuvres = ['SteepCurve', 'HalfCubanEight', 'Immelmann', 'Split-S', 'Climb', 'Approach', 'TaxiRun&TakeOff', 'Landing', 'Roll', 'CanopyRoll', 'CubanEight', 'Hammerhead', 'Tailslide']
 
 print(len(glob.glob(f'{datasetPath}/{id}/{manoeuvreQuality}/{manoeuvreName}/*.csv')))
 
