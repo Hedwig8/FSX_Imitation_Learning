@@ -6,6 +6,8 @@ from manoeuvres_data.splitS import split_s_controls
 from manoeuvres_data.curve import curve_controls
 from manoeuvres_data.altitudeChanger import altitude_changer_controls
 
+from manoeuvres_data.roll import roll_controls
+
 manoeuvre_data = {
     'Approach': approach_controls,
     'Climb': climb_controls,
@@ -14,4 +16,7 @@ manoeuvre_data = {
     'Split-S': split_s_controls,
     'SteepCurve': curve_controls,
     'AltitudeChanger': altitude_changer_controls,
+
+    'Roll': roll_controls,
+    'CanopyRoll': roll_controls
 }

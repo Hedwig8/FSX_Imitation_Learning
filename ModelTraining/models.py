@@ -32,5 +32,8 @@ manoeuvre_model = {
     'Immelmann': default_LSTM_model,
     'Split-S': default_LSTM_model,
     'SteepCurve': default_LSTM_model,
+
+    'Roll': default_LSTM_model,
+    'CanopyRoll': default_LSTM_model,
 }
 

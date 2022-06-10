@@ -14,7 +14,7 @@ def default_features(X_list, y_list, window):
     return X_final, y_final
 
 # window unused, just to be according to structure
-def curve_preparation(X_list, y_list, window):
+def no_window(X_list, y_list, window):
     X_final = np.empty(shape=(0, X_list[0].shape[1]))
     y_final = np.empty(shape=(0))
     for X, y in zip(X_list, y_list):
@@ -24,12 +24,15 @@ def curve_preparation(X_list, y_list, window):
 
 manoeuvre_dataset_2_input = {
     'Approach': default_features,
-    'Climb': curve_preparation,
+    'Climb': no_window,
     'HalfCubanEight': default_features,
     'Immelmann': default_features,
     'Split-S': default_features,
     'SteepCurve': default_features,
     'AltitudeChanger': default_features,
+
+    'Roll': default_features,
+    'CanopyRoll': default_features,
 }
 
 manoeuvre_window_size = {
@@ -40,4 +43,7 @@ manoeuvre_window_size = {
     'Split-S': 15,
     'SteepCurve': 15,
     'AltitudeChanger': 15,
+
+    'Roll': 15,
+    'CanopyRoll': 15,
 }

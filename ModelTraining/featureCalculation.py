@@ -37,7 +37,7 @@ def immelmann_features(ex_list):
     new_list = []
     for df in ex_list:
         df['time_diff'] = df['time'].diff().shift(-1)
-        final_altitude = df['altitude'].loc[-1]
+        final_altitude = df['altitude'].iloc[-1]
         df['altitude_diff'] = final_altitude - df['altitude']
         new_list.append(df[:-1])
     return new_list
@@ -75,6 +75,15 @@ def curve_features(ex_list):
         new_list.append(df[:-1])
     return new_list
 
+
+def roll_features(ex_list):
+    new_list=[]
+    for df in ex_list:
+        df['time_diff'] = df['time'].diff().shift(-1)
+        new_list.append(df[:-1])
+    return new_list
+
+
 manoeuvre_feature_calculation = {
     'Approach': approach_features,
     'Climb': climb_features,
@@ -82,4 +91,7 @@ manoeuvre_feature_calculation = {
     'Immelmann': immelmann_features,
     'Split-S': split_s_features,
     'SteepCurve': curve_features,
+
+    'Roll': roll_features,
+    'CanopyRoll': roll_features,
 }

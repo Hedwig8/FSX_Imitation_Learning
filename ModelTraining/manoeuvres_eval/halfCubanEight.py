@@ -1,18 +1,21 @@
 from math import pi as PI, isnan
 import numpy as np
 
-def immelmann_eval(df):
-    INITIAL_FINAL_HEADING_EXP_WEIGHT = 10
-    INITIAL_FINAL_HEADING_WEIGHT = 100
+def half_eval(df):
+    INITIAL_FINAL_HEADING_EXP_WEIGHT = 6
+    INITIAL_FINAL_HEADING_WEIGHT = 2000
 
-    HEADING_DIFF_EXP_WEIGHT = 2.5
-    HEADING_DIFF_WEIGHT = 1
+    HEADING_DIFF_EXP_WEIGHT = 2
+    HEADING_DIFF_WEIGHT = 2.5
 
     SEMI_LOOP_EXP_WEIGHT = 2.3
     SEMI_LOOP_WEIGHT = 1
 
-    SEMI_ROLL_EXP_WEIGHT = 2
-    SEMI_ROLL_WEIGHT = 1
+    SEMI_ROLL_EXP_WEIGHT = 3
+    SEMI_ROLL_WEIGHT = .002
+
+    SEMI_ROLL_STRAIGHT_EXP_WEIGHT = 3
+    SEMI_ROLL_STRAIGHT_WEIGHT = .5
 
     # vertical plane consistency
     # initial and final heading are references 
@@ -23,7 +26,7 @@ def immelmann_eval(df):
 
     diff = (final_heading - initial_heading + PI) % (PI * 2) - PI # smaller angle
     eval_heading_initial_final = (PI - abs(diff) + 1) ** INITIAL_FINAL_HEADING_EXP_WEIGHT * INITIAL_FINAL_HEADING_WEIGHT
-    
+    #print(initial_heading, final_heading, eval_heading_initial_final)
     
     eval_heading_diff = 0
     for heading in heading_np[5:-5]:
@@ -54,11 +57,23 @@ def immelmann_eval(df):
     eval_semi_roll = eval_semi_roll if not isnan(eval_semi_roll) else 500
 
     eval_semi_roll = eval_semi_roll ** SEMI_ROLL_EXP_WEIGHT * SEMI_ROLL_WEIGHT
+
+    # semi-roll straight line
+    # compare pitch changes when performing roll
+    temp_pitch_straight = df[df['pitch'] > threshold_pitch_roll]
+    temp_pitch_bank_straight = temp_pitch_straight[abs(temp_pitch_straight['bank']) > threshold_roll]
+    pitch_straight = temp_pitch_bank_straight['pitch'].to_numpy()
+    eval_semi_roll_straightness = np.std(pitch_straight) * pitch_straight.size
+    eval_semi_roll_straightness = eval_semi_roll_straightness if not isnan(eval_semi_roll_straightness) else 500
+
+    eval_semi_roll_straightness = eval_semi_roll_straightness ** SEMI_ROLL_STRAIGHT_EXP_WEIGHT * SEMI_ROLL_STRAIGHT_WEIGHT
+
     
-    eval = eval_heading_diff+eval_heading_initial_final+eval_semi_loop+eval_semi_roll
+    eval = eval_heading_diff+eval_heading_initial_final+eval_semi_loop+eval_semi_roll+eval_semi_roll_straightness
     return eval, {
                     'heading_initial_final': eval_heading_initial_final, 
                     'heading_diff': eval_heading_diff, 
                     'semi_loop': eval_semi_loop, 
-                    'semi_roll': eval_semi_roll
+                    'semi_roll': eval_semi_roll,
+                    'semi_roll_straightness': eval_semi_roll_straightness
                 }

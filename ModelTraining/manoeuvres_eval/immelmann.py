@@ -23,7 +23,7 @@ def immelmann_eval(df):
 
     diff = (final_heading - initial_heading + PI) % (PI * 2) - PI # smaller angle
     eval_heading_initial_final = (PI - abs(diff) + 1) ** INITIAL_FINAL_HEADING_EXP_WEIGHT * INITIAL_FINAL_HEADING_WEIGHT
-    
+    #print(initial_heading, final_heading, eval_heading_initial_final)
     
     eval_heading_diff = 0
     for heading in heading_np[5:-5]:
