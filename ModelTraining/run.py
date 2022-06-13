@@ -54,7 +54,7 @@ start_time = time.time()
 for manoeuvre_name, controls in manoeuvres_controls.items():
     # list of pd.DataFrame examples
     examples_eval_list = []
-    for filename in glob.glob(f'{dataset_path}/{id}/{manoeuvre_quality}/{manoeuvre_name}/*_1.csv', recursive=True)[0:50]:
+    for filename in glob.glob(f'{dataset_path}/{id}/{manoeuvre_quality}/{manoeuvre_name}/*_1.csv', recursive=True):
         df = pd.read_csv(filename)
         examples_eval_list.append((df, manoeuvre_evaluation[manoeuvre_name](df)))
 
