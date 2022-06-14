@@ -640,9 +640,7 @@ namespace FSXLSTM
                 case "AltitudeChanger":
                 case "Approach":
                 case "Climb":
-                case "Immelmann":
-                case "Split-S":
-                    /*FormImmelmann formImmelmann = new FormImmelmann();
+                    FormImmelmann formImmelmann = new FormImmelmann();
                     DialogResult dialogResult = formImmelmann.ShowDialog();
                     if (dialogResult == DialogResult.Yes)
                     {
@@ -650,7 +648,21 @@ namespace FSXLSTM
                         TARGET_ALTITUDE = double.Parse(input.ToList()[0].Text);
                     }
 
-                    INITIAL_HEADING = 0; // to be initialized later when curve is called*/
+                    INITIAL_HEADING = 0; // to be initialized later when curve is called
+                    break;
+                case "Immelmann":
+                case "Split-S":
+                case "Roll":
+                case "CanopyRoll":
+                    /*FormImmelmann formImmelmann = new FormImmelmann();
+                    DialogResult dialogResult = formImmelmann.ShowDialog();
+                    if (dialogResult == DialogResult.Yes)
+                    {
+                        var input = formImmelmann.Controls.OfType<TextBox>().Where(i => i.Tag.ToString() == "TARGET_ALTITUDE");
+                        TARGET_ALTITUDE = double.Parse(input.ToList()[0].Text);
+                    }*/
+
+                    INITIAL_HEADING = 0; // to be initialized later when curve is called
                     break;
                 case "HalfCubanEight":
                     /*FormHalfCubanEight formHalfCubanEight = new FormHalfCubanEight();
@@ -661,9 +673,9 @@ namespace FSXLSTM
                         TARGET_ALTITUDE = double.Parse(input.ToList()[0].Text);
                         var input2 = formHalfCubanEight.Controls.OfType<TextBox>().Where(i => i.Tag.ToString() == "MAX_ALTITUDE");
                         TARGET_MAX_ALTITUDE = double.Parse(input2.ToList()[0].Text);
-                    }
+                    }*/
 
-                    INITIAL_HEADING = 0; // to be initialized later when curve is called*/
+                    INITIAL_HEADING = 0; // to be initialized later when curve is called
                     break;
                 case "SteepCurve":
                     FormHeading formHeading = new FormHeading();

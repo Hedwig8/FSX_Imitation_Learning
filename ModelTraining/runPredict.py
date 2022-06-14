@@ -18,21 +18,27 @@ manoeuvres_controls = {
     'SteepCurve': ['elevator', 'aileron', 'rudder'],
     'Split-S': ['elevator', 'aileron'],
     'HalfCubanEight': ['elevator', 'aileron'],
-    #'Climb': ['elevator'],
-    #'Approach': ['elevator', 'throttle'],
+    'Climb': ['elevator'],
+    'Approach': ['elevator',], # 'throttle'],
     #'AltitudeChanger': ['elevator'],
+
+    'Roll': ['aileron', 'elevator'],
+    'CanopyRoll': ['aileron', 'elevator'],
     
     #'TaxiRun&TakeOff': [],
     #'Landing': [],
-    #'Roll': [], #aileron, elevator?
-    #'CanopyRoll': [], #aileron, elevator?
     #'CubanEight': [],
     #'HammerHead': [],
     #'Tailslide': []
 }
 
-models = load_models(manoeuvres_controls)
-scalers = load_scalers(manoeuvres_controls)
+#outputs_absolute = 'absolute'
+outputs_absolute = 'relative'
+
+threshold = .9
+
+models = load_models(manoeuvres_controls, outputs_absolute, threshold)
+scalers = load_scalers(manoeuvres_controls, outputs_absolute, threshold)
 
 # stored inputs
 dataset = None
@@ -79,8 +85,11 @@ while True:
             scaled_X = scalers[manoeuvre_name][surface].transform(reshaped_X)
             if len(original_shape) == 3:
                 scaled_X = np.reshape(scaled_X, original_shape)
-
+            
             outputs[surface] = float(models[manoeuvre_name][surface].predict(scaled_X)[0][0])
+            if outputs_absolute == 'relative':
+                outputs[surface] += dataset[surface].iloc[-1]
+    
     print(outputs)
 
     socket.send_json(outputs)

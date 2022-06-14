@@ -44,11 +44,13 @@
             this.button2 = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.radioButton8 = new System.Windows.Forms.RadioButton();
+            this.radioButton9 = new System.Windows.Forms.RadioButton();
             this.SuspendLayout();
             // 
             // start
             // 
-            this.start.Location = new System.Drawing.Point(10, 236);
+            this.start.Location = new System.Drawing.Point(12, 294);
             this.start.Margin = new System.Windows.Forms.Padding(4);
             this.start.Name = "start";
             this.start.Size = new System.Drawing.Size(156, 37);
@@ -59,7 +61,7 @@
             // 
             // bStop
             // 
-            this.bStop.Location = new System.Drawing.Point(174, 236);
+            this.bStop.Location = new System.Drawing.Point(176, 294);
             this.bStop.Margin = new System.Windows.Forms.Padding(4);
             this.bStop.Name = "bStop";
             this.bStop.Size = new System.Drawing.Size(156, 37);
@@ -154,7 +156,7 @@
             // 
             // manoeuvreCircuit
             // 
-            this.manoeuvreCircuit.Location = new System.Drawing.Point(9, 498);
+            this.manoeuvreCircuit.Location = new System.Drawing.Point(11, 556);
             this.manoeuvreCircuit.Name = "manoeuvreCircuit";
             this.manoeuvreCircuit.Size = new System.Drawing.Size(320, 34);
             this.manoeuvreCircuit.TabIndex = 16;
@@ -164,7 +166,7 @@
             // 
             // stopManoeuvreCircuit
             // 
-            this.stopManoeuvreCircuit.Location = new System.Drawing.Point(9, 538);
+            this.stopManoeuvreCircuit.Location = new System.Drawing.Point(11, 596);
             this.stopManoeuvreCircuit.Name = "stopManoeuvreCircuit";
             this.stopManoeuvreCircuit.Size = new System.Drawing.Size(320, 34);
             this.stopManoeuvreCircuit.TabIndex = 17;
@@ -174,7 +176,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(9, 312);
+            this.button1.Location = new System.Drawing.Point(11, 370);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(320, 34);
             this.button1.TabIndex = 18;
@@ -184,7 +186,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(9, 352);
+            this.button2.Location = new System.Drawing.Point(11, 410);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(320, 34);
             this.button2.TabIndex = 19;
@@ -194,7 +196,7 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(151, 408);
+            this.textBox1.Location = new System.Drawing.Point(153, 466);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(92, 22);
             this.textBox1.TabIndex = 20;
@@ -203,17 +205,43 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(81, 411);
+            this.label1.Location = new System.Drawing.Point(83, 469);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(64, 16);
             this.label1.TabIndex = 21;
             this.label1.Text = "Aircraft ID";
             // 
+            // radioButton8
+            // 
+            this.radioButton8.AutoSize = true;
+            this.radioButton8.Location = new System.Drawing.Point(40, 230);
+            this.radioButton8.Name = "radioButton8";
+            this.radioButton8.Size = new System.Drawing.Size(52, 20);
+            this.radioButton8.TabIndex = 22;
+            this.radioButton8.TabStop = true;
+            this.radioButton8.Tag = "Roll";
+            this.radioButton8.Text = "Roll";
+            this.radioButton8.UseVisualStyleBackColor = true;
+            // 
+            // radioButton9
+            // 
+            this.radioButton9.AutoSize = true;
+            this.radioButton9.Location = new System.Drawing.Point(40, 256);
+            this.radioButton9.Name = "radioButton9";
+            this.radioButton9.Size = new System.Drawing.Size(102, 20);
+            this.radioButton9.TabIndex = 23;
+            this.radioButton9.TabStop = true;
+            this.radioButton9.Tag = "CanopyRoll";
+            this.radioButton9.Text = "Canopy Roll";
+            this.radioButton9.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(343, 584);
+            this.ClientSize = new System.Drawing.Size(343, 651);
+            this.Controls.Add(this.radioButton9);
+            this.Controls.Add(this.radioButton8);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.button2);
@@ -255,5 +283,7 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.RadioButton radioButton8;
+        private System.Windows.Forms.RadioButton radioButton9;
     }
 }

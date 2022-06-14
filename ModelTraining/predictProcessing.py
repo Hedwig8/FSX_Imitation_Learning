@@ -37,12 +37,20 @@ def curve_features(df, final_heading):
     df['heading_diff'] = heading_diff
     return df[1:]
 
+def roll_features(df, final_heading):
+    df['time_diff'] = df['time'].diff() * 1000 # s -> ms
+
+    return df[1:]
+
 manoeuvre_predict_processing = {
-    'Approach': max_altitude_features, # OK - it was min-altitude
+    'Approach': max_altitude_features, # OK - it was trained with min-altitude
     'Climb': climb_features, # OK
     'HalfCubanEight': half_cuban_eight_features,
     'Immelmann': max_altitude_features, # OK
-    'Split-S': min_altitude_features, # OK - it was altitude-min
+    'Split-S': min_altitude_features, # OK - it was trained with altitude-min
     'SteepCurve': curve_features,
     'AltitudeChanger': max_altitude_features,
+
+    'Roll': roll_features,
+    'CanopyRoll': roll_features,
 }
