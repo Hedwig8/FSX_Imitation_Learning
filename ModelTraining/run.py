@@ -23,9 +23,9 @@ trained_models_path = "../TrainedModels"
 
 # combinations of manoeuvers and control surfaces
 manoeuvres_controls = {
-    'Immelmann': ['elevator', 'aileron'],
-    'Split-S': ['elevator', 'aileron'],
-    'HalfCubanEight': ['elevator', 'aileron'],
+    #'Immelmann': ['elevator', 'aileron'],
+    #'Split-S': ['elevator', 'aileron'],
+    #'HalfCubanEight': ['elevator', 'aileron'],
     'Climb': ['elevator'],
     'Approach': ['elevator', 'throttle'],
     
@@ -46,7 +46,7 @@ def absolute_file_name(absolute):
     return 'absolute' if absolute else 'relative'
 
 evaluation_thresholds = [1, 0.9, 0.75, 0.6]
-absolute_output = [True, False]
+absolute_output = [True,]# False]
 
 start_time = time.time()
 

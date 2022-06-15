@@ -22,7 +22,7 @@ namespace FSXLSTM
         public string MANOEUVRE = "";
         public double TARGET_ALTITUDE = 0; //Altitude in feets
         public double INITIAL_HEADING = 0;
-        public double TARGET_HEADING = 0;
+        public double TARGET_ROTATION = 0;
         public double TARGET_MAX_ALTITUDE = 0;
         
         struct CommInput
@@ -30,7 +30,7 @@ namespace FSXLSTM
             public string Manoeuvre;
             public double TARGET_ALTITUDE;
             public double TARGET_MAX_ALTITUDE;
-            public double TARGET_HEADING;
+            public double TARGET_ROTATION;
             public double INITIAL_HEADING;
 
             public Control1[] Input;
@@ -52,6 +52,7 @@ namespace FSXLSTM
         bool CircuitControl = false;
         Thread CircuitControlThread = null;
 
+        // airplane creation
         double InitialLatitude = 41.2334213;
         double InitialLongitude = -8.67733345;
         double InitialHeading = 0;
@@ -543,7 +544,7 @@ namespace FSXLSTM
             {
                 Manoeuvre = MANOEUVRE,
                 TARGET_ALTITUDE = TARGET_ALTITUDE,
-                TARGET_HEADING = TARGET_HEADING,
+                TARGET_ROTATION = TARGET_ROTATION,
                 TARGET_MAX_ALTITUDE = TARGET_MAX_ALTITUDE,
                 INITIAL_HEADING = INITIAL_HEADING,
                 Input = dataBuffer.ToArray()
@@ -647,8 +648,6 @@ namespace FSXLSTM
                         var input = formImmelmann.Controls.OfType<TextBox>().Where(i => i.Tag.ToString() == "TARGET_ALTITUDE");
                         TARGET_ALTITUDE = double.Parse(input.ToList()[0].Text);
                     }
-
-                    INITIAL_HEADING = 0; // to be initialized later when curve is called
                     break;
                 case "Immelmann":
                 case "Split-S":
@@ -661,8 +660,6 @@ namespace FSXLSTM
                         var input = formImmelmann.Controls.OfType<TextBox>().Where(i => i.Tag.ToString() == "TARGET_ALTITUDE");
                         TARGET_ALTITUDE = double.Parse(input.ToList()[0].Text);
                     }*/
-
-                    INITIAL_HEADING = 0; // to be initialized later when curve is called
                     break;
                 case "HalfCubanEight":
                     /*FormHalfCubanEight formHalfCubanEight = new FormHalfCubanEight();
@@ -674,22 +671,22 @@ namespace FSXLSTM
                         var input2 = formHalfCubanEight.Controls.OfType<TextBox>().Where(i => i.Tag.ToString() == "MAX_ALTITUDE");
                         TARGET_MAX_ALTITUDE = double.Parse(input2.ToList()[0].Text);
                     }*/
-
-                    INITIAL_HEADING = 0; // to be initialized later when curve is called
                     break;
                 case "SteepCurve":
                     FormHeading formHeading = new FormHeading();
                     DialogResult dialogResultHeading = formHeading.ShowDialog();
                     if (dialogResultHeading == DialogResult.Yes)
                     {
+                        // input is rotation
                         var input = formHeading.Controls.OfType<TextBox>().Where(i => i.Tag.ToString() == "TARGET_ALTITUDE");
-                        TARGET_HEADING = Utils.Degrees2Radians(double.Parse(input.ToList()[0].Text));
+                        TARGET_ROTATION = Utils.Degrees2Radians(double.Parse(input.ToList()[0].Text));
                     }
+                    
                     break;
                 default:
                     break;
             }
-
+            INITIAL_HEADING = 0; // to be initialized later when curve is called
             StartManoeuvre();
         }
 

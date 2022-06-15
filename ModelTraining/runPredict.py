@@ -67,7 +67,7 @@ while True:
 
         X = [] # different parameters and parameters number
         if manoeuvre_name == 'SteepCurve':
-            X = manoeuvre_predict_processing[manoeuvre_name](df_window, comm_data['TARGET_HEADING'])
+            X = manoeuvre_predict_processing[manoeuvre_name](df_window, comm_data['TARGET_ROTATION'], comm_data['INITIAL_HEADING'])
         elif manoeuvre_name == 'HalfCubanEight':
             X = manoeuvre_predict_processing[manoeuvre_name](df_window, comm_data['TARGET_ALTITUDE'], comm_data['TARGET_MAX_ALTITUDE'])
         else:

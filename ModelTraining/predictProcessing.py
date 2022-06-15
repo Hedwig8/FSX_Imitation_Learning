@@ -25,19 +25,22 @@ def min_altitude_features(df, min_altitude):
     df['altitude_diff'] = df['altitude'] - min_altitude
     return df[1:]
 
-def curve_features(df, final_heading):
+def curve_features(df, rotation, initial_heading):
     df['time_diff'] = df['time'].diff() * 1000 # s -> ms
     df['acc_rot_body_x'] = df['velocity_rot_body_x'].diff()
     df['acc_rot_body_y'] = df['velocity_rot_body_y'].diff()
     df['acc_rot_body_z'] = df['velocity_rot_body_z'].diff()
+
+    final_heading = (initial_heading + rotation) % (2 * PI)
     heading_diff = []
     for heading in df['heading']:
-        diff = final_heading - heading
+        diff = final_heading - heading 
         heading_diff.append((diff + PI) % (2*PI) - PI)
     df['heading_diff'] = heading_diff
+
     return df[1:]
 
-def roll_features(df, final_heading):
+def roll_features(df):
     df['time_diff'] = df['time'].diff() * 1000 # s -> ms
 
     return df[1:]
