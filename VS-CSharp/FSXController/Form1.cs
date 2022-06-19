@@ -10,6 +10,9 @@ using NetMQ.Sockets;
 using Newtonsoft.Json;
 using System.Text;
 using System.Threading;
+using System.IO;
+using CsvHelper;
+using System.Globalization;
 
 namespace FSXLSTM
 {
@@ -57,6 +60,19 @@ namespace FSXLSTM
         double InitialLongitude = -8.67733345;
         double InitialHeading = 0;
         double InitialAltitude = 2000;
+
+        // get results for 2D graph comparing AI vs User control inputs
+        bool GetResults = true;
+        List<ResultsAIvsUser> Results = new List<ResultsAIvsUser>();
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
+        struct ResultsAIvsUser
+        {
+            public double Elevator { get; set; }
+            public double UserElevator { get; set; }
+            public double Aileron { get; set; }
+            public double UserAileron { get; set; }
+        };
 
         #endregion
 
@@ -549,6 +565,20 @@ namespace FSXLSTM
                 INITIAL_HEADING = INITIAL_HEADING,
                 Input = dataBuffer.ToArray()
             };
+
+            if (GetResults)
+            {
+                Control1 last = dataBuffer.Last();
+                Results.Add(new ResultsAIvsUser()
+                {
+                    Elevator = 0,
+                    Aileron = 0,
+
+                    UserElevator = last.elevator,
+                    UserAileron = last.aileron,
+                });
+            }
+
             dataBuffer.Clear();
             return CI;
         }
@@ -584,6 +614,15 @@ namespace FSXLSTM
 
         void ControlFSX(CommOutput controls)
         {
+            if (GetResults)
+            {
+                ResultsAIvsUser last = Results[Results.Count - 1];
+                last.Elevator = controls.elevator;
+                last.Aileron = controls.aileron;
+                Results[Results.Count - 1] = last;
+                return;
+            }
+
             if (controls.elevator < 10)
             {
                 var elevator = new ElevatorSurface() { elevator = controls.elevator };
@@ -628,6 +667,12 @@ namespace FSXLSTM
             simconnect.RequestDataOnSimObject(DATA_REQUESTS.REQUEST_1, DEFINITIONS.Control1, AircraftID, SIMCONNECT_PERIOD.NEVER, 0, 0, 0, 0);
             //simconnect.Dispose();
             //simconnect = null;
+
+            if (GetResults)
+            {
+                writeToCSV(Results, "AI", MANOEUVRE, "Results");
+                Results.Clear();
+            }
         }
 
         #endregion
@@ -738,6 +783,28 @@ namespace FSXLSTM
             else
             {
                 base.DefWndProc(ref m);
+            }
+        }
+
+        void writeToCSV<StructT>(List<StructT> logT, string id, string Manuevre, string struct1or2)
+        {
+            string path = "logs/Good/" + id + "/" + Manuevre + "/";
+            Directory.CreateDirectory(path);
+
+            string time = DateTime.Now.ToString("yyyy-MM-ddTHH-mm-ss");
+            string filename = time + "_" + struct1or2 + ".csv";
+
+            using (var writer = new StreamWriter(path + filename))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            {
+                csv.WriteHeader<StructT>();
+                csv.NextRecord();
+
+                foreach (var s1 in logT)
+                {
+                    csv.WriteRecord<StructT>(s1);
+                    csv.NextRecord();
+                }
             }
         }
 

@@ -15,15 +15,15 @@ def pandas2numpy(X_list, manoeuvre):
 #models
 manoeuvres_controls = {
     'Immelmann': ['elevator', 'aileron'],
-    'SteepCurve': ['elevator', 'aileron', 'rudder'],
+    #'SteepCurve': ['elevator', 'aileron', 'rudder'],
     'Split-S': ['elevator', 'aileron'],
     'HalfCubanEight': ['elevator', 'aileron'],
-    'Climb': ['elevator'],
-    'Approach': ['elevator',], # 'throttle'],
+    #'Climb': ['elevator'],
+    #'Approach': ['elevator',], # 'throttle'],
     #'AltitudeChanger': ['elevator'],
 
-    'Roll': ['aileron', 'elevator'],
-    'CanopyRoll': ['aileron', 'elevator'],
+    #'Roll': ['aileron', 'elevator'],
+    #'CanopyRoll': ['aileron', 'elevator'],
     
     #'TaxiRun&TakeOff': [],
     #'Landing': [],
@@ -32,10 +32,10 @@ manoeuvres_controls = {
     #'Tailslide': []
 }
 
-#outputs_absolute = 'absolute'
-outputs_absolute = 'relative'
+outputs_absolute = 'absolute'
+#outputs_absolute = 'relative'
 
-threshold = .9
+threshold = 1
 
 models = load_models(manoeuvres_controls, outputs_absolute, threshold)
 scalers = load_scalers(manoeuvres_controls, outputs_absolute, threshold)
