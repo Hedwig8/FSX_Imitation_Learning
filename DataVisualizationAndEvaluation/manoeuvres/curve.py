@@ -3,13 +3,13 @@ from sklearn.preprocessing import normalize
 
 def curve_eval(df):
     ALTITUDE_DIFF_EXP_WEIGHT = 1
-    ALTITUDE_DIFF_WEIGHT = 1
+    ALTITUDE_DIFF_WEIGHT = 20000
 
-    BANK_DIFF_EXP_WEIGHT = 1
-    BANK_DIFF_WEIGHT = 1000
+    BANK_DIFF_EXP_WEIGHT = 3
+    BANK_DIFF_WEIGHT = 500
 
-    PITCH_DIFF_EXP_WEIGHT = 1
-    PITCH_DIFF_WEIGHT = 1000
+    PITCH_DIFF_EXP_WEIGHT = 3
+    PITCH_DIFF_WEIGHT = 3
 
     # altitude consistency
     # std * all values
