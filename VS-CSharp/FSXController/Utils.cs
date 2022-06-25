@@ -7,8 +7,8 @@ namespace FSXLSTM
     {
         public static bool IsStable(double pitch, double bank)
         {
-            var PitchLimit = new double[] { -0.3, 0.1 };
-            var BankLimit = new double[] { -0.2, 0.2 };
+            var PitchLimit = new double[] { -0.3, 0.2 };
+            var BankLimit = new double[] { -0.3, 0.3 };
             return pitch > PitchLimit[0] && pitch < PitchLimit[1] &&
                 bank > BankLimit[0] && bank < BankLimit[1];
         }

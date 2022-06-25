@@ -59,10 +59,10 @@ namespace FSXLSTM
         double InitialLatitude = 41.2334213;
         double InitialLongitude = -8.67733345;
         double InitialHeading = 0;
-        double InitialAltitude = 2000;
+        double InitialAltitude = 4000;
 
         // get results for 2D graph comparing AI vs User control inputs
-        bool GetResults = true;
+        bool GetResults = false;
         List<ResultsAIvsUser> Results = new List<ResultsAIvsUser>();
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
@@ -378,8 +378,8 @@ namespace FSXLSTM
                 {
                     AircraftID =(uint)(DATA_REQUESTS)data.dwObjectID;
                     Console.WriteLine("Aircraft created with id " + AircraftID);
-                    AircraftFirstWaypoint();
                     textBox1.Text = AircraftID.ToString();
+                    AircraftFirstWaypoint();
                 }
             } 
             catch(Exception e)
@@ -412,8 +412,7 @@ namespace FSXLSTM
             var GoalPoint = Utils.calculateDestinationPosition(InitialLatitude, InitialLongitude, InitialAltitude * 0.3048, InitialHeading, 1000);
             Console.WriteLine($"{InitialLatitude}, {InitialLongitude} -> {GoalPoint[0]}, {GoalPoint[1]}");
             GoToPoint(GoalPoint[0], GoalPoint[1], InitialAltitude);
-            Thread.Sleep(10000);
-            ReleaseControl();
+            //Thread.Sleep(10000);
         }
 
 
@@ -530,6 +529,7 @@ namespace FSXLSTM
                 Thread.Sleep(400); // TODO choose better pause value?
             }
             Console.WriteLine("End of circuit");
+            StraightFlight(GetControlBuffer().Last());
         }
         #endregion
 
@@ -542,8 +542,8 @@ namespace FSXLSTM
                 Altitude = altitude, 
                 Latitude = Utils.Radians2Degrees(latitude),
                 Longitude = Utils.Radians2Degrees(longitude),
-                percentThrottle = 100,
-                Flags = (uint)SIMCONNECT_WAYPOINT_FLAGS.THROTTLE_REQUESTED,
+                ktsSpeed = 170,
+                Flags = (uint)SIMCONNECT_WAYPOINT_FLAGS.SPEED_REQUESTED,
             };
             
             simconnect.SetDataOnSimObject(DEFINITIONS.AircraftWaypoints, AircraftID, 0, new Object[] { waypoint });
@@ -742,6 +742,7 @@ namespace FSXLSTM
         
         private void manoeuvreCircuit_Click(object sender, EventArgs e)
         {
+            ReleaseControl();
             CircuitControl = true;
             CircuitControlThread = new Thread(() => { CircuitControlLoop(); });
             CircuitControlThread.Start();
