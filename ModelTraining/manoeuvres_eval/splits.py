@@ -1,6 +1,7 @@
 from math import pi as PI, atan2, cos, sin, sqrt
 import numpy as np
 from skg import nsphere_fit
+from visUtils import velocity_to_position
 
 def std_point_to_curve(point, r, center):
     x, y = point
@@ -12,6 +13,7 @@ def std_point_to_curve(point, r, center):
     return distance
 
 def split_s_eval(df):
+    df = velocity_to_position(df)
     
     INITIAL_FINAL_HEADING_EXP_WEIGHT = 2
     INITIAL_FINAL_HEADING_WEIGHT = 10000
