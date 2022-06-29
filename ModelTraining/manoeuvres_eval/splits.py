@@ -1,5 +1,15 @@
-from math import pi as PI, isnan
+from math import pi as PI, atan2, cos, sin, sqrt
 import numpy as np
+from skg import nsphere_fit
+
+def std_point_to_curve(point, r, center):
+    x, y = point
+    xc, yc = center
+    angle = atan2(y-yc, x-xc)
+    x1 = r * cos(angle) + xc
+    y1 = r * sin(angle) + yc
+    distance = sqrt((x1-x) ** 2 + (y1-y) ** 2)
+    return distance
 
 def split_s_eval(df):
     
@@ -9,14 +19,14 @@ def split_s_eval(df):
     HEADING_DIFF_EXP_WEIGHT = 3
     HEADING_DIFF_WEIGHT = .25
 
-    SEMI_LOOP_EXP_WEIGHT = 2.3
-    SEMI_LOOP_WEIGHT = .4
+    SEMI_LOOP_EXP_WEIGHT = 1.5
+    SEMI_LOOP_WEIGHT = .03
 
     SEMI_ROLL_COMPLETION_EXP_WEIGHT = 2
     SEMI_ROLL_COMPLETION_WEIGHT = 20
 
-    SEMI_ROLL_EXP_WEIGHT = 3
-    SEMI_ROLL_WEIGHT = .0008
+    SEMI_ROLL_ALTITUDE_EXP_WEIGHT = 2
+    SEMI_ROLL_ALTITUDE_WEIGHT = 4
 
      # vertical plane consistency
     # initial and final heading are references 
@@ -39,12 +49,15 @@ def split_s_eval(df):
     eval_heading_diff = eval_heading_diff ** HEADING_DIFF_EXP_WEIGHT * HEADING_DIFF_WEIGHT
 
     # semi-loop consistency
-    # compare all x-axis rotation velocity
-    # when pitch is higher than 0 (pointing downwards)
+    # select all point whose pitch is higher than 0 (pointing downwards)
+    # then fit to circunference and calculate deviations from the curve
     threshold_pitch = 0
-    rot_vel_x = np.abs(df[df['pitch'] > threshold_pitch]['velocity_rot_body_x'].to_numpy())
-
-    eval_semi_loop = np.std(rot_vel_x) * rot_vel_x.size ** SEMI_LOOP_EXP_WEIGHT * SEMI_LOOP_WEIGHT
+    yz_points = np.abs(df[df['pitch'] > threshold_pitch][['y', 'z']].to_numpy())
+    radius, center = nsphere_fit(yz_points)
+    error = 0
+    for point in yz_points:
+        error += std_point_to_curve(point, radius, center)
+    eval_semi_loop = error ** SEMI_LOOP_EXP_WEIGHT * SEMI_LOOP_WEIGHT
 
     # semi-roll completion
     # sum all bank values of the airplane
@@ -63,20 +76,20 @@ def split_s_eval(df):
     # compare all z-axis rotation velocity
     # when roll is between 2 values and higher than threshold_pitch
     threshold_roll = 0.2
-    threshold_pitch_roll = -0.3
-    temp_pitch = df[df['pitch'] > threshold_pitch_roll] # 
+    threshold_pitch_roll = 0.1
+    temp_pitch = df[df['pitch'] < threshold_pitch_roll] # 
     temp_pitch_bank = temp_pitch[abs(temp_pitch['bank']) > threshold_roll]
-    rot_vel_z = temp_pitch_bank['velocity_rot_body_z'].to_numpy()
-    eval_semi_roll = np.std(rot_vel_z) * rot_vel_z.size
-    eval_semi_roll = eval_semi_roll if not isnan(eval_semi_roll) else 500
+    altitude_diff_np = np.abs(np.diff(temp_pitch_bank['altitude']))
+    altitude_diff_np = altitude_diff_np[altitude_diff_np < 50]
+    eval_semi_roll_altitude = np.sum(altitude_diff_np)
 
-    eval_semi_roll = eval_semi_roll ** SEMI_ROLL_EXP_WEIGHT * SEMI_ROLL_WEIGHT
+    eval_semi_roll_altitude = eval_semi_roll_altitude ** SEMI_ROLL_ALTITUDE_EXP_WEIGHT * SEMI_ROLL_ALTITUDE_WEIGHT
     
-    eval = eval_heading_diff+eval_heading_initial_final+eval_semi_loop+eval_semi_roll_completion+eval_semi_roll
+    eval = eval_heading_diff+eval_heading_initial_final+eval_semi_loop+eval_semi_roll_completion+eval_semi_roll_altitude
     return eval, {
                     'heading_initial_final': eval_heading_initial_final, 
                     'heading_diff': eval_heading_diff, 
                     'semi_loop': eval_semi_loop,
                     'semi_roll_completion': eval_semi_roll_completion,
-                    'semi_roll': eval_semi_roll
+                    'semi_roll_altitude': eval_semi_roll_altitude
                 }

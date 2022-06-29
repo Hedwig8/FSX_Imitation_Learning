@@ -1,6 +1,5 @@
 import glob
 import pandas as pd
-from math import isnan
 import plotly.express as px
 
 from visUtils import velocity_to_position, rotate_initial_heading
