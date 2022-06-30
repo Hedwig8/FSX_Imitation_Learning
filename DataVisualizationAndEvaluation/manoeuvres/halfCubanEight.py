@@ -59,7 +59,7 @@ def half_eval(df):
         error += std_point_to_curve(point, radius, center)
     eval_semi_loop = error ** SEMI_LOOP_EXP_WEIGHT * SEMI_LOOP_WEIGHT
 
-    # semi-roll consistency
+    # semi-roll overshoot
     # analyse the evolution of bank values, looking for sign changes
     # when roll is between 2 values and higher than threshold_pitch
     threshold_roll = 0.2
