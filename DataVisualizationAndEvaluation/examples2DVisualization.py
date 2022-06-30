@@ -24,7 +24,7 @@ for filename in glob.glob(f'{dataset_path}/{id}/{manoeuvre_quality}/{manoeuvre_n
     components_evals_list.append((eval, components))
 
 components_box = px.box(components_list)
-components_box.update_layout(xaxis=dict(tickfont=dict(size=25)),
+components_box.update_layout(xaxis=dict(tickfont=dict(size=30)),
                                 yaxis=dict(tickfont=dict(size=15)),
                                 boxgap=0,
                                 margin=dict(
@@ -33,7 +33,7 @@ components_box.update_layout(xaxis=dict(tickfont=dict(size=25)),
 components_box.show()
 
 evals_box =  px.box(dict(total_evaluation = evals_list))
-evals_box.update_layout(xaxis=dict(tickfont=dict(size=25)),
+evals_box.update_layout(xaxis=dict(tickfont=dict(size=30)),
                                 yaxis=dict(tickfont=dict(size=15)),
                                 margin=dict(
                                     r=1450,
