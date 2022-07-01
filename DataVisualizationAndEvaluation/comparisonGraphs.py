@@ -4,11 +4,12 @@ import plotly.graph_objects as go
 import glob
 
 from evaluation import manoeuvre_evaluation
+from visUtils import velocity_to_position
 
 dataset_path = '../ProcessedDataset'
 id = '*'
 manoeuvre_quality = 'Good'
-manoeuvre_name = 'Split-S'
+manoeuvre_name = 'Immelmann'
 
 results_path = '../Results'
 
@@ -17,6 +18,7 @@ evals = {
 }
 for filename in glob.glob(f'{dataset_path}/{id}/{manoeuvre_quality}/{manoeuvre_name}/*_1.csv', recursive=True):
     df = pd.read_csv(filename)
+    df = velocity_to_position(df)
     eval, _ = manoeuvre_evaluation[manoeuvre_name](df)
     evals['Examples'].append(eval)
 
@@ -25,6 +27,7 @@ for t in threshold:
     t_evals = []
     for filename in glob.glob(f'{results_path}/{id}/{t}/{manoeuvre_name}/*_1.csv', recursive=True):
         df = pd.read_csv(filename)
+        df = velocity_to_position(df)
         eval, _ = manoeuvre_evaluation[manoeuvre_name](df)
         t_evals.append(eval)
     evals[f'{int(t*100)}%'] = t_evals
