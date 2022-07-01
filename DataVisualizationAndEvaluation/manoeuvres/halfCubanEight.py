@@ -26,7 +26,7 @@ def half_eval(df):
     SEMI_ROLL_WEIGHT = 120000
 
     SEMI_ROLL_STRAIGHT_EXP_WEIGHT = 3
-    SEMI_ROLL_STRAIGHT_WEIGHT = .5
+    SEMI_ROLL_STRAIGHT_WEIGHT = 1000000
 
     # vertical plane consistency
     # initial and final heading are references 
@@ -81,7 +81,7 @@ def half_eval(df):
     temp_pitch_straight = df[df['pitch'] > threshold_pitch_roll]
     temp_pitch_bank_straight = temp_pitch_straight[abs(temp_pitch_straight['bank']) > threshold_roll]
     pitch_straight = temp_pitch_bank_straight['pitch'].to_numpy()
-    eval_semi_roll_straightness = np.std(pitch_straight) * pitch_straight.size
+    eval_semi_roll_straightness = np.std(pitch_straight) # TODO rethink this
     eval_semi_roll_straightness = eval_semi_roll_straightness if not isnan(eval_semi_roll_straightness) else 500
 
     eval_semi_roll_straightness = eval_semi_roll_straightness ** SEMI_ROLL_STRAIGHT_EXP_WEIGHT * SEMI_ROLL_STRAIGHT_WEIGHT

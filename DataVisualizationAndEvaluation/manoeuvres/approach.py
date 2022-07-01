@@ -11,7 +11,7 @@ def approach_eval(df):
     # constant descent rate
     descent_rate_np = df['altitude'].diff().shift(-1)[:-1].to_numpy()
     normalized_descent_rate = normalize([descent_rate_np])[0]
-    eval_constant_descent_rate = np.std(normalized_descent_rate) * descent_rate_np.size
+    eval_constant_descent_rate = np.std(normalized_descent_rate) * descent_rate_np.size #TODO rethink this
 
     eval_constant_descent_rate = eval_constant_descent_rate ** CONSTANT_DESCENT_RATE_EXP_WEIGHT * CONSTANT_DESCENT_RATE_WEIGHT
 

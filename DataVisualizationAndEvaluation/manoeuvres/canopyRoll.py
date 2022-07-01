@@ -31,7 +31,7 @@ def canopy_roll_eval(df):
     temp_bank = df[abs(df['bank']) > threshold_bank]
     rot_vel_z = temp_bank['velocity_rot_body_z'].to_numpy()
     normalized_rot_vez_z = normalize([rot_vel_z])[0]
-    eval_roll_consistency = np.std(normalized_rot_vez_z) * rot_vel_z.size
+    eval_roll_consistency = np.std(normalized_rot_vez_z) * rot_vel_z.size #TODO rethink this
     eval_roll_consistency = eval_roll_consistency ** ROLL_CONSISTENCY_EXP_WEIGHT * ROLL_CONSISTENCY_WEIGHT
 
     

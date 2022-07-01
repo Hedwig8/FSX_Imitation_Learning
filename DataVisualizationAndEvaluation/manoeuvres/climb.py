@@ -13,7 +13,7 @@ def climb_eval(df):
     # constant climb rate
     climb_rate_np = df['altitude'].diff().shift(-1)[:-1].to_numpy()
     normalized_climb_rate = normalize([climb_rate_np])[0]
-    eval_constant_climb_rate = np.std(normalized_climb_rate) * climb_rate_np.size
+    eval_constant_climb_rate = np.std(normalized_climb_rate) * climb_rate_np.size #TODO rethink this
 
     eval_constant_climb_rate = eval_constant_climb_rate ** CONSTANT_CLIMB_RATE_EXP_WEIGHT * CONSTANT_CLIMB_RATE_WEIGHT
 

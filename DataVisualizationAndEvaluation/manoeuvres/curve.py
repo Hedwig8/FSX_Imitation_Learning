@@ -11,7 +11,7 @@ def curve_eval(df):
     PITCH_DIFF_EXP_WEIGHT = 3
     PITCH_DIFF_WEIGHT = 3
 
-    # altitude consistency
+    # altitude consistency -> TODO: change for altitude delta sum
     # std * all values
     altitude_np = df['altitude'].to_numpy()
     normalized_altitude = normalize([altitude_np])[0]
@@ -37,9 +37,10 @@ def curve_eval(df):
     eval_pitch_diff = eval_pitch_diff ** PITCH_DIFF_EXP_WEIGHT * PITCH_DIFF_WEIGHT
 
     # std from perfect circle curve
-    # calculate perfect curve from initial and final heading and position
-    # std ?? curve is "mean"
-    # TODO
+    # fit xy datapoints to circumference curve
+    # distance from datapoint to closest point in circumference
+    # replace both above
+    # TODO with calculations already done in immelmann, split-s or halfcubaneight
 
     eval = eval_altitude_diff+eval_bank_diff+eval_pitch_diff
     return eval, {
