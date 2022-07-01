@@ -12,6 +12,7 @@ manoeuvre_quality = 'Good'
 manoeuvre_name = 'Immelmann'
 
 results_path = '../Results'
+id_results = 'AI'
 
 evals = {
     'Examples': []
@@ -25,7 +26,7 @@ for filename in glob.glob(f'{dataset_path}/{id}/{manoeuvre_quality}/{manoeuvre_n
 threshold = [1, .9, .75, .6]
 for t in threshold:
     t_evals = []
-    for filename in glob.glob(f'{results_path}/{id}/{t}/{manoeuvre_name}/*_1.csv', recursive=True):
+    for filename in glob.glob(f'{results_path}/{id_results}/{t}/{manoeuvre_name}/*_1.csv', recursive=True):
         df = pd.read_csv(filename)
         df = velocity_to_position(df)
         eval, _ = manoeuvre_evaluation[manoeuvre_name](df)

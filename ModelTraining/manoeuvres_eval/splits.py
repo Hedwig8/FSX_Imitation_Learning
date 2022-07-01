@@ -1,7 +1,7 @@
 from math import pi as PI, atan2, cos, sin, sqrt
 import numpy as np
 from skg import nsphere_fit
-from visUtils import velocity_to_position
+from visUtils import velocity_to_position, rotate_initial_heading
 
 def std_point_to_curve(point, r, center):
     x, y = point
@@ -13,22 +13,24 @@ def std_point_to_curve(point, r, center):
     return distance
 
 def split_s_eval(df):
-    df = velocity_to_position(df)
+    if not {'x', 'y', 'z'}.issubset(df.columns):
+        df = velocity_to_position(df)
+        df = rotate_initial_heading(df)
     
-    INITIAL_FINAL_HEADING_EXP_WEIGHT = 2
-    INITIAL_FINAL_HEADING_WEIGHT = 10000
+    INITIAL_FINAL_HEADING_EXP_WEIGHT = 1
+    INITIAL_FINAL_HEADING_WEIGHT = .6
 
-    HEADING_DIFF_EXP_WEIGHT = 3
-    HEADING_DIFF_WEIGHT = .25
+    HEADING_DIFF_EXP_WEIGHT = 1
+    HEADING_DIFF_WEIGHT = 1
 
-    SEMI_LOOP_EXP_WEIGHT = 1.5
-    SEMI_LOOP_WEIGHT = .03
+    SEMI_LOOP_EXP_WEIGHT = 1
+    SEMI_LOOP_WEIGHT = 1
 
-    SEMI_ROLL_COMPLETION_EXP_WEIGHT = 2
-    SEMI_ROLL_COMPLETION_WEIGHT = 20
+    SEMI_ROLL_COMPLETION_EXP_WEIGHT = 1
+    SEMI_ROLL_COMPLETION_WEIGHT = 1
 
-    SEMI_ROLL_ALTITUDE_EXP_WEIGHT = 2
-    SEMI_ROLL_ALTITUDE_WEIGHT = 4
+    SEMI_ROLL_ALTITUDE_EXP_WEIGHT = 1
+    SEMI_ROLL_ALTITUDE_WEIGHT = .5
 
      # vertical plane consistency
     # initial and final heading are references 
@@ -38,8 +40,7 @@ def split_s_eval(df):
     final_heading = heading_np[-1]
 
     diff = (final_heading - initial_heading + PI) % (PI * 2) - PI # smaller angle
-    eval_heading_initial_final = (PI - abs(diff) + 1) ** INITIAL_FINAL_HEADING_EXP_WEIGHT * INITIAL_FINAL_HEADING_WEIGHT
-    #print(initial_heading, final_heading, eval_heading_initial_final)
+    eval_heading_initial_final = (180 - abs(diff * 180 / PI)) ** INITIAL_FINAL_HEADING_EXP_WEIGHT * INITIAL_FINAL_HEADING_WEIGHT
     
     eval_heading_diff = 0
     for heading in heading_np[5:-5]:
@@ -48,7 +49,7 @@ def split_s_eval(df):
         final_diff = (heading - final_heading + PI) % (2 * PI) - PI
         
         eval_heading_diff += min(abs(initial_diff), abs(final_diff))
-    eval_heading_diff = eval_heading_diff ** HEADING_DIFF_EXP_WEIGHT * HEADING_DIFF_WEIGHT
+    eval_heading_diff = (180 * eval_heading_diff / PI / (heading_np.size-2)) ** HEADING_DIFF_EXP_WEIGHT * HEADING_DIFF_WEIGHT
 
     # semi-loop consistency
     # select all point whose pitch is higher than 0 (pointing downwards)
@@ -59,7 +60,7 @@ def split_s_eval(df):
     error = 0
     for point in yz_points:
         error += std_point_to_curve(point, radius, center)
-    eval_semi_loop = error ** SEMI_LOOP_EXP_WEIGHT * SEMI_LOOP_WEIGHT
+    eval_semi_loop = (error/yz_points.size * .3048) ** SEMI_LOOP_EXP_WEIGHT * SEMI_LOOP_WEIGHT
 
     # semi-roll completion
     # sum all bank values of the airplane
@@ -72,9 +73,9 @@ def split_s_eval(df):
 
         eval_semi_roll_completion += min(abs(diff_from_0), abs(diff_from_PI))
 
-    eval_semi_roll_completion = eval_semi_roll_completion ** SEMI_ROLL_COMPLETION_EXP_WEIGHT * SEMI_ROLL_COMPLETION_WEIGHT
+    eval_semi_roll_completion = (eval_semi_roll_completion * 180 / PI / banks_in_loop.size) ** SEMI_ROLL_COMPLETION_EXP_WEIGHT * SEMI_ROLL_COMPLETION_WEIGHT
 
-    # semi-roll consistency
+    # semi-roll altitude consistency
     # compare all z-axis rotation velocity
     # when roll is between 2 values and higher than threshold_pitch
     threshold_roll = 0.2
@@ -85,7 +86,7 @@ def split_s_eval(df):
     altitude_diff_np = altitude_diff_np[altitude_diff_np < 50]
     eval_semi_roll_altitude = np.sum(altitude_diff_np)
 
-    eval_semi_roll_altitude = eval_semi_roll_altitude ** SEMI_ROLL_ALTITUDE_EXP_WEIGHT * SEMI_ROLL_ALTITUDE_WEIGHT
+    eval_semi_roll_altitude = (eval_semi_roll_altitude * .3048) ** SEMI_ROLL_ALTITUDE_EXP_WEIGHT * SEMI_ROLL_ALTITUDE_WEIGHT
     
     eval = eval_heading_diff+eval_heading_initial_final+eval_semi_loop+eval_semi_roll_completion+eval_semi_roll_altitude
     return eval, {

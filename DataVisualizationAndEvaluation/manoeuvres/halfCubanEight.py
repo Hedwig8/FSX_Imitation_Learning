@@ -1,6 +1,7 @@
-from math import pi as PI, isnan, atan2, cos, sin, sqrt
+from math import pi as PI, atan2, cos, sin, sqrt
 import numpy as np
 from skg import nsphere_fit
+from visUtils import velocity_to_position, rotate_initial_heading
 
 def std_point_to_curve(point, r, center):
     x, y = point
@@ -13,20 +14,24 @@ def std_point_to_curve(point, r, center):
 
 
 def half_eval(df):
-    INITIAL_FINAL_HEADING_EXP_WEIGHT = 6
-    INITIAL_FINAL_HEADING_WEIGHT = 2000
+    if not {'x', 'y', 'z'}.issubset(df.columns):
+        df = velocity_to_position(df)
+        df = rotate_initial_heading(df)
+    
+    INITIAL_FINAL_HEADING_EXP_WEIGHT = 1
+    INITIAL_FINAL_HEADING_WEIGHT = 1
 
-    HEADING_DIFF_EXP_WEIGHT = 2
-    HEADING_DIFF_WEIGHT = 2.5
+    HEADING_DIFF_EXP_WEIGHT = 1
+    HEADING_DIFF_WEIGHT = 1
 
-    SEMI_LOOP_EXP_WEIGHT = 1.3
-    SEMI_LOOP_WEIGHT = .3
+    SEMI_LOOP_EXP_WEIGHT = 1
+    SEMI_LOOP_WEIGHT = 1
 
     SEMI_ROLL_EXP_WEIGHT = 1
-    SEMI_ROLL_WEIGHT = 120000
+    SEMI_ROLL_WEIGHT = 1
 
-    SEMI_ROLL_STRAIGHT_EXP_WEIGHT = 3
-    SEMI_ROLL_STRAIGHT_WEIGHT = 1000000
+    SEMI_ROLL_STRAIGHT_EXP_WEIGHT = 2
+    SEMI_ROLL_STRAIGHT_WEIGHT = .05
 
     # vertical plane consistency
     # initial and final heading are references 
@@ -36,17 +41,16 @@ def half_eval(df):
     final_heading = heading_np[-1]
 
     diff = (final_heading - initial_heading + PI) % (PI * 2) - PI # smaller angle
-    eval_heading_initial_final = (PI - abs(diff) + 1) ** INITIAL_FINAL_HEADING_EXP_WEIGHT * INITIAL_FINAL_HEADING_WEIGHT
-    #print(initial_heading, final_heading, eval_heading_initial_final)
+    eval_heading_initial_final = (180 - abs(diff * 180 / PI)) ** INITIAL_FINAL_HEADING_EXP_WEIGHT * INITIAL_FINAL_HEADING_WEIGHT
     
     eval_heading_diff = 0
-    for heading in heading_np[5:-5]:
+    for heading in heading_np[1:-1]:
         initial_diff = (heading - initial_heading + PI) % (2 * PI) - PI
         
         final_diff = (heading - final_heading + PI) % (2 * PI) - PI
         
         eval_heading_diff += min(abs(initial_diff), abs(final_diff))
-    eval_heading_diff = eval_heading_diff ** HEADING_DIFF_EXP_WEIGHT * HEADING_DIFF_WEIGHT
+    eval_heading_diff = (180 * eval_heading_diff / PI / (heading_np.size-2)) ** HEADING_DIFF_EXP_WEIGHT * HEADING_DIFF_WEIGHT
 
     # semi-loop consistency
     # select all point whose pitch is lower than -0.1 (pointing upwards)
@@ -57,7 +61,7 @@ def half_eval(df):
     error = 0
     for point in yz_points:
         error += std_point_to_curve(point, radius, center)
-    eval_semi_loop = error ** SEMI_LOOP_EXP_WEIGHT * SEMI_LOOP_WEIGHT
+    eval_semi_loop = (error / yz_points.size * 0.3048) ** SEMI_LOOP_EXP_WEIGHT * SEMI_LOOP_WEIGHT
 
     # semi-roll overshoot
     # analyse the evolution of bank values, looking for sign changes
@@ -74,7 +78,7 @@ def half_eval(df):
             overshoot = np.sum(np.abs(np.diff(bank_np[i:])))
             break
 
-    eval_semi_roll = overshoot ** SEMI_ROLL_EXP_WEIGHT * SEMI_ROLL_WEIGHT
+    eval_semi_roll = (overshoot * 180 / PI / 2) ** SEMI_ROLL_EXP_WEIGHT * SEMI_ROLL_WEIGHT
 
     # semi-roll straight line
     # compare pitch changes when performing roll
@@ -82,9 +86,8 @@ def half_eval(df):
     temp_pitch_bank_straight = temp_pitch_straight[abs(temp_pitch_straight['bank']) > threshold_roll]
     pitch_straight = temp_pitch_bank_straight['pitch'].to_numpy()
     eval_semi_roll_straightness = np.std(pitch_straight) # TODO rethink this
-    eval_semi_roll_straightness = eval_semi_roll_straightness if not isnan(eval_semi_roll_straightness) else 500
 
-    eval_semi_roll_straightness = eval_semi_roll_straightness ** SEMI_ROLL_STRAIGHT_EXP_WEIGHT * SEMI_ROLL_STRAIGHT_WEIGHT
+    eval_semi_roll_straightness = (eval_semi_roll_straightness * 180 / PI) ** SEMI_ROLL_STRAIGHT_EXP_WEIGHT * SEMI_ROLL_STRAIGHT_WEIGHT
 
     
     eval = eval_heading_diff+eval_heading_initial_final+eval_semi_loop+eval_semi_roll+eval_semi_roll_straightness

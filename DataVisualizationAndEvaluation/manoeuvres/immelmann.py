@@ -1,6 +1,7 @@
 from math import pi as PI, atan2, cos, sin, sqrt
 import numpy as np
 from skg import nsphere_fit
+from visUtils import velocity_to_position, rotate_initial_heading
 
 def std_point_to_curve(point, r, center):
     x, y = point
@@ -12,20 +13,24 @@ def std_point_to_curve(point, r, center):
     return distance
 
 def immelmann_eval(df):
+    if not {'x', 'y', 'z'}.issubset(df.columns):
+        df = velocity_to_position(df)
+        df = rotate_initial_heading(df)
+
     INITIAL_FINAL_HEADING_EXP_WEIGHT = 1
     INITIAL_FINAL_HEADING_WEIGHT = 2
 
     HEADING_DIFF_EXP_WEIGHT = 1
-    HEADING_DIFF_WEIGHT = 3
+    HEADING_DIFF_WEIGHT = 2
 
     SEMI_LOOP_EXP_WEIGHT = 1
     SEMI_LOOP_WEIGHT = 1
 
     SEMI_ROLL_EXP_WEIGHT = 1
-    SEMI_ROLL_WEIGHT = 1
+    SEMI_ROLL_WEIGHT = 1.4
 
     SEMI_ROLL_ALTITUDE_EXP_WEIGHT = 1
-    SEMI_ROLL_ALTITUDE_WEIGHT = .3
+    SEMI_ROLL_ALTITUDE_WEIGHT = .2
 
     # vertical plane consistency
     # initial and final heading are references 
@@ -35,7 +40,7 @@ def immelmann_eval(df):
     final_heading = heading_np[-1]
 
     diff = (final_heading - initial_heading + PI) % (PI * 2) - PI # smaller angle
-    eval_heading_initial_final = (180 - abs(diff * 180 / PI) + 1) ** INITIAL_FINAL_HEADING_EXP_WEIGHT * INITIAL_FINAL_HEADING_WEIGHT
+    eval_heading_initial_final = (180 - abs(diff * 180 / PI)) ** INITIAL_FINAL_HEADING_EXP_WEIGHT * INITIAL_FINAL_HEADING_WEIGHT
     
     
     eval_heading_diff = 0
