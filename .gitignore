@@ -38,4 +38,6 @@ dataset/
 __pycache__/
 *.csv
 !Results/*/*/*/*.csv
+PublishedDataset/*
 SimPlatform/
+AircraftAerobaticManoeuvres.zip

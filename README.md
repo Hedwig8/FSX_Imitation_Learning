@@ -102,3 +102,65 @@ The following presents an exhaustive list of all the variables that *AircraftDat
 * Sea level pressure
 * Gear position
 * Current fuel
+
+
+## Edited at 05/10/2022 by Henrique Freitas (HF) - author of Learn to Fly II: Acrobatic Manoeuvres
+
+The code present in this repository was all developed and used in the context of Learn to Fly II development. The Python scripts played a major role in the data processing and visualization, including all ML training phases. Inside each code folder is a readme.md explaining the usage of each script. 
+
+Below I wrote a brief description of each folder.
+
+
+#### CircuitControlResults folder
+
+Contains the `.csv` files of the collected data regarding the last stage of the project, Circuit Control. Each `.csv` has timestamps collected during the execution of the manoeuvres.
+
+Unfortunately I don't recall which are good or bad. Two experiments were made: CircuitControl (first) and CircuitControl2 (second). The classification in Good/Bad and Hammerhead/Tailslide are not to be trusted: the AircraftDataCollector app (more info on VS-CSharp folder) was done for collecting individual manoeuvres and was reused here, so the classification was a simple way to differentiate between runs.
+
+
+#### DataProcessing
+
+These were the first and last scripts I created, some early in the Data Collection phase and one at the end when preparing for the dataset publication. They either read `.csv` files and output information or process `.csv` and write new ones with fixed data.
+
+More info in the `readme.md` inside this folder.
+
+
+#### DataVisualizationAndEvaluation
+
+Scripts used for mainly data visualization. All graphs are built using plotly library. 
+
+`evaluation` file and `manoeuvres` folder have the metrics used in each manoeuvres. They are a duplicated of the `evaluation` file and `manoeuvres_eval` folder in `ModelTraining` folder. I could not make Python modules out of them, so that was the only quick solution I got. Now, I advise to use something like symbolic links to use it in both folders.
+
+More info in the `readme.md` inside this folder.
+
+#### Model Training
+
+In a broad sense, all these scripts are part of the training of the models, with the preprocessed data from `DataProcessing/fixTimeIntervals`. The only scripts supposed to be run here are the one starting with `run`: `run*.py`.
+
+More info in the `readme.md` inside this folder.
+
+#### ProcessedDataset
+
+After the initially collected dataset, some data files were not in the same format (especifically the time column) and needed to be processed using scripts from `DataProcessing/`.
+
+#### PublishedDataset
+
+Rearranged processed dataset, for the publication of it.
+
+#### Results
+
+Final results gathered in the tests phase. The graphs shown in the dissertation document were constructed using this data.
+
+#### TrainedModels
+
+Last batch of trained models, these were used to originate the datasets inside `Results/`.
+
+#### UnprocessedResults
+
+These are the data files from the last tests done (and kept, the remaining unprocessed data was being deleted throughout the development of the dissertation). Relative to Transfer Learning test phase.
+
+#### VS-CSharp
+
+The C# code for the 2 windows forms application used for communication with the FSX runtime. 
+
+More info in the `readme.md` inside this folder.
